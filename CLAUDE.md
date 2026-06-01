@@ -8,7 +8,7 @@ Read this entire file before doing anything else in a session.
 ## Who You Are Working With
 
 **Name:** Syed  
-**Degree:** 3-year university programme (Year 1 in progress)  
+**Degree:** 3-year university programme (Year 2 in progress)  
 **Goal:** Build a genuine, deep understanding of all 6 modules across 3 years — not to pass exams, but to actually know the material.
 
 **Current knowledge baseline:** Starting from near zero on most topics. Has not attended most lectures. All module materials are available as raw files (PDFs, ZIPs, slides).

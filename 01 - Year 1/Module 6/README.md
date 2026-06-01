@@ -1,4 +1,4 @@
-# Year 2 — Module 1
+# Year 1 — Module 6
 
 > Module name and code to be filled in.
 
@@ -12,4 +12,4 @@
 > Add week-by-week topics here once module is identified.
 
 ## Tags
-`#year/2`
+`#year/1`
