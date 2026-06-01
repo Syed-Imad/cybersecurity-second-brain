@@ -1,79 +1,73 @@
 # Cybersecurity Second Brain
 
-> A personal knowledge system for building deep, lasting understanding of cybersecurity — across 3 years of university, work, and self-study.
+> A personal knowledge system for building deep, lasting understanding of cybersecurity —
+> across 3 years of university, work experience, and self-study.
 > Raw materials go in. Claude processes them. Distilled, linked, analogy-rich notes come out.
 
 ---
 
 ## Table of Contents
 
-1. [How the System Works](#how-the-system-works)
-2. [Folder Structure Explained](#folder-structure-explained)
-3. [Step-by-Step: Adding a New Module](#step-by-step-adding-a-new-module)
-4. [Claude Prompts — Exact Commands to Use](#claude-prompts--exact-commands-to-use)
-5. [Setting Up Obsidian](#setting-up-obsidian)
-6. [How the Notes Are Structured](#how-the-notes-are-structured)
-7. [The Learning Phases](#the-learning-phases)
-8. [GitHub — Pushing Updates](#github--pushing-updates)
-9. [Progress Tracker](#progress-tracker)
-10. [Dos and Don'ts](#dos-and-donts)
+1. [How the System Works](#1-how-the-system-works)
+2. [Folder Structure](#2-folder-structure)
+3. [Adding a New Module — Step by Step](#3-adding-a-new-module--step-by-step)
+4. [Claude Prompts — Exact Commands](#4-claude-prompts--exact-commands)
+5. [The Three Types of Notes](#5-the-three-types-of-notes)
+6. [Setting Up Obsidian](#6-setting-up-obsidian)
+7. [Learning Methods](#7-learning-methods)
+8. [Querying the Knowledge Base](#8-querying-the-knowledge-base)
+9. [Learning Logs — Continuing Across Sessions](#9-learning-logs--continuing-across-sessions)
+10. [GitHub](#10-github)
+11. [Progress Tracker](#11-progress-tracker)
+12. [Dos and Don'ts](#12-dos-and-donts)
+13. [Quick Reference Card](#13-quick-reference-card)
 
 ---
 
-## How the System Works
+## 1. How the System Works
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                   │
-│   YOU                                                             │
-│   Drop raw lecture slides, PDFs, and ZIPs into Raw Materials/    │
-│                        │                                          │
-│                        ▼                                          │
-│   CLAUDE CODE                                                     │
-│   Reads everything. Distils it into atomic, linked,              │
-│   analogy-rich Zettelkasten notes.                               │
-│                        │                                          │
-│                        ▼                                          │
-│   KNOWLEDGE BASE                                                  │
-│   Clean markdown notes you can learn from, search,              │
-│   navigate in Obsidian, and feed to AI models.                   │
-│                                                                   │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                    │
+│  YOU                                                               │
+│  Drop raw files (slides, PDFs, ZIPs) into Raw Materials/          │
+│                         │                                          │
+│                         ▼                                          │
+│  CLAUDE CODE                                                       │
+│  Reads everything. Generates three things:                        │
+│  · Atomic Zettelkasten notes (for linking + querying)             │
+│  · A readable Study Guide (for actually learning from)            │
+│  · A Learning Log (so you can continue another day)               │
+│                         │                                          │
+│                         ▼                                          │
+│  KNOWLEDGE BASE                                                    │
+│  Clean markdown you can study, navigate in Obsidian,              │
+│  query with Claude, and feed to other AI models.                  │
+│                                                                    │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-**The core idea:** You never sit and read 300 slides. Claude does that. What you get back is the distilled essence — every concept explained with an analogy, key facts, and links to related ideas. Then you learn from those notes, get tested on them, and over time they compound into a connected web of knowledge.
+**You never read raw slides.** Claude does that work. What you get is the distilled essence of every concept — explained with an analogy, structured clearly, linked to related ideas across every module.
 
-**Why Zettelkasten?** Instead of notes siloed by module, every concept is its own atomic file. A note on `Hash Functions` links to `Salting`, `HMAC`, `Digital Signatures`, and `Preimage Resistance` — regardless of which module or year they came from. By Year 3 you have a web of interconnected knowledge, not 6 separate piles of notes you've forgotten.
+**Why Zettelkasten?** Instead of notes siloed by module, every concept is its own atomic file. A note on `Hash Functions` links to `Salting`, `HMAC`, `Digital Signatures`, and `Preimage Resistance` regardless of which year or module they came from. New modules don't create new silos — they enrich the existing web. By Year 3 you have a dense connected knowledge graph, not 6 separate piles of notes.
 
 ---
 
-## Folder Structure Explained
+## 2. Folder Structure
 
 ```
 cybersecurity-second-brain/
 │
-├── 📁 Raw Materials/                ← YOUR INPUT — drop files here
-│   ├── Year 1/
-│   │   ├── Module 1/                ← empty, ready for your files
-│   │   ├── Module 2/
-│   │   ├── Module 3/
-│   │   ├── Module 4/
-│   │   ├── Module 5/
-│   │   └── Module 6/
-│   ├── Year 2/
-│   │   ├── Module 1 - WM242 ISS/    ← has a pointer to your ISS files
-│   │   ├── Module 2/
-│   │   └── ... (Modules 3–6)
-│   ├── Year 3/
-│   │   ├── Module 1–6/
-│   │   └── Dissertation/
-│   ├── Work & Internships/          ← internship docs, notes, resources
-│   └── Courses/
-│       ├── TryHackMe/               ← room writeups, notes, paths
-│       └── Other/                   ← any other courses/certs
+├── 📁 Raw Materials/                 ← YOUR INPUT — drop files here
+│   ├── Year 1/ (Modules 1–6)
+│   ├── Year 2/ (Modules 1–6)        ← WM242 ISS lives here
+│   ├── Year 3/ (Modules 1–6 + Dissertation)
+│   ├── Work & Internships/
+│   └── Courses/ (TryHackMe, Other)
 │
-├── 📁 Knowledge Base/               ← CLAUDE'S OUTPUT — your second brain
-│   ├── Concepts/                    ← all atomic notes live here
+├── 📁 Knowledge Base/                ← CLAUDE'S OUTPUT — open this in Obsidian
+│   │
+│   ├── Concepts/                     ← atomic Zettelkasten notes (one per concept)
 │   │   ├── Cryptography Foundations/
 │   │   ├── Symmetric Cryptography/
 │   │   ├── Asymmetric Cryptography/
@@ -85,366 +79,477 @@ cybersecurity-second-brain/
 │   │   ├── Cryptanalysis/
 │   │   ├── Advanced Cryptography/
 │   │   └── Secure System Design/
-│   ├── MOC/                         ← Maps of Content — topic navigation hubs
-│   └── Index/                       ← master index across all notes
+│   │
+│   ├── Study Guides/                 ← readable narrative explanations per module
+│   │   └── WM242 ISS — Study Guide.md  ✅
+│   │
+│   ├── MOC/                          ← Maps of Content (navigation hubs per module)
+│   └── Index/                        ← master index across everything
 │
-├── 📁 Templates/                    ← note templates for Claude to use
+├── 📁 Learning Logs/                 ← session records — continue learning any day
+│   ├── README.md                     ← index of all sessions + querying guide
+│   └── 2026-06-01 — WM242 — Phase 1 — Full Ingestion.md  ✅
+│
+├── 📁 Templates/                     ← Claude uses these when generating notes
 │   ├── Concept-Note.md
 │   ├── Module-Overview.md
-│   └── Work-Role.md
+│   ├── Work-Role.md
+│   └── Learning-Log.md
 │
-├── CLAUDE.md                        ← instructions Claude reads at session start
-├── SYSTEM.md                        ← full methodology and blueprint
-└── README.md                        ← this file
+├── CLAUDE.md                         ← Claude reads this at the start of every session
+├── SYSTEM.md                         ← full methodology and blueprint
+└── README.md                         ← this file
 ```
 
-### The Two Folders That Matter Most
+### What each folder is for
 
-| Folder | What it is | You interact with it by |
-|--------|-----------|------------------------|
-| `Raw Materials/` | Where source files live | Dropping your lecture ZIPs/PDFs in |
-| `Knowledge Base/` | Your actual second brain | Opening in Obsidian, reading, studying |
+| Folder | Purpose | You interact by |
+|--------|---------|----------------|
+| `Raw Materials/` | Source files — slides, ZIPs, PDFs | Dropping files in |
+| `Knowledge Base/Concepts/` | Atomic notes — for linking, querying, Obsidian graph | Reading individual concepts |
+| `Knowledge Base/Study Guides/` | Readable narrative — for actually studying | Reading top to bottom |
+| `Knowledge Base/MOC/` | Navigation hubs — one per module | Jumping to topic areas |
+| `Learning Logs/` | Session history — for continuity across days | Pointing Claude at the latest log |
 
-> **Raw Materials are NOT pushed to GitHub.** The `.gitignore` excludes PDFs, ZIPs, and MP4s — they're too large and potentially sensitive. Only the Knowledge Base notes (clean markdown) are tracked and pushed.
+> **Raw Materials are NOT pushed to GitHub.** PDFs, ZIPs, and videos are excluded by `.gitignore`. Only the Knowledge Base and Learning Logs (clean markdown) go to GitHub.
 
 ---
 
-## Step-by-Step: Adding a New Module
-
-Here is the exact process every single time you get new module content:
+## 3. Adding a New Module — Step by Step
 
 ### Step 1 — Get your files
-Download the module materials from your university portal. You'll usually get:
-- A folder of weekly ZIP files (each containing lecture slides + lab PDFs)
-- Or individual PDFs per week
+Download module materials from your university portal. Usually weekly ZIP files or individual PDFs per week.
 
 ### Step 2 — Drop files into Raw Materials
-Navigate to the correct year and module folder:
 ```
 Raw Materials/Year X/Module Y - [Module Name]/
 ```
-Dump everything in there. ZIPs, PDFs, whatever you have. Don't organise them — Claude will sort through it.
+Dump everything in. Don't organise — Claude handles that.
 
-> **WM242 ISS is a special case.** The files already exist at:
+> WM242 ISS is a special case — materials already exist at:
 > `/Users/syedimaduddin/Documents/ISS Module Materials (ALL)`
-> They don't need to be moved — just point Claude at that path.
+> No need to move them. Just point Claude at that path.
 
-### Step 3 — Open Claude Code in this project folder
-Open your terminal and run:
+### Step 3 — Open Claude Code in this project
 ```bash
 cd "/Users/syedimaduddin/Documents/Claude/Cybersecurity Second Brain"
 claude
 ```
-Or open the folder in Claude Code directly from the UI.
 
-### Step 4 — Use the ingestion prompt
-Say this to Claude:
+### Step 4 — Run the ingestion prompt
 ```
-Read CLAUDE.md, then ingest the module at Raw Materials/Year 2/Module 2 - [name]/
+Read CLAUDE.md and my latest log in Learning Logs/.
+Then ingest Raw Materials/Year 2/Module 2 - [name]/
+Generate:
+1. Atomic concept notes in Knowledge Base/Concepts/
+2. A readable Study Guide in Knowledge Base/Study Guides/
+3. A MOC in Knowledge Base/MOC/
+4. A learning log in Learning Logs/
 ```
-Claude will:
-1. Read `CLAUDE.md` to understand your learning style
-2. Read all the raw files
-3. Generate atomic Zettelkasten notes in `Knowledge Base/Concepts/`
-4. Create a MOC (Map of Content) in `Knowledge Base/MOC/`
-5. Update the progress tracker
 
-### Step 5 — Review what was generated
-Open Obsidian (see setup below) and look through the new notes. If anything is unclear, ask Claude to re-explain it with a better analogy.
-
-### Step 6 — Push to GitHub
+### Step 5 — Review, then push
 ```bash
 git add -A
-git commit -m "Add [Module Name] notes — Phase 1 complete"
+git commit -m "Add [Module Name] — Phase 1 complete, 20 notes generated"
 git push
 ```
 
 ---
 
-## Claude Prompts — Exact Commands to Use
+## 4. Claude Prompts — Exact Commands
 
-Copy and paste these. They are designed to work with `CLAUDE.md`.
-
-### Starting a session
+### Starting any session
 ```
-Read CLAUDE.md, then let's work on [Module Name]
-```
-
-### Ingesting a new module
-```
-Read CLAUDE.md, then ingest everything at Raw Materials/Year 2/Module 2 - [name]/ and generate Zettelkasten notes in Knowledge Base/Concepts/
+Read CLAUDE.md and my latest log in Learning Logs/
+Then [tell me what we're doing today]
 ```
 
-### Ingesting WM242 ISS specifically
+### Ingesting a module
 ```
-Read CLAUDE.md, then ingest the ISS materials at /Users/syedimaduddin/Documents/ISS Module Materials (ALL) and generate Zettelkasten notes
+Read CLAUDE.md and ingest Raw Materials/Year 2/Module 2 - [name]/
+Generate atomic concept notes, a study guide, a MOC, and a learning log.
 ```
 
-### Getting taught a specific topic
+### Being taught a topic
 ```
-Read CLAUDE.md, then teach me [topic] — use an analogy and examples
+Read CLAUDE.md and teach me [topic] using an analogy and examples.
+Start with the problem it solves before explaining how it works.
 ```
 
 ### Active recall (Phase 2)
 ```
-I'm going to do active recall on [module]. Ask me to explain each concept and tell me what I get wrong or miss
+I'm doing active recall on [module]. I'll write what I remember — don't help yet.
+After I paste, tell me: what I got wrong, what I missed, and what to focus on next.
 ```
 
 ### Getting quizzed (Phase 3)
 ```
-Quiz me on [module/topic] with exam-style scenario questions. Wait for my answer before giving feedback
+Quiz me on [topic] with scenario-based questions.
+One at a time. Wait for my full answer before the next question.
+Give detailed feedback after each answer.
 ```
 
-### Generating a note for a specific concept
+### Continuing from a previous session
 ```
-Create a Zettelkasten note for [concept] using the template in Templates/Concept-Note.md and save it to Knowledge Base/Concepts/[topic folder]/
-```
-
-### Checking what's been covered
-```
-Read CLAUDE.md and tell me what modules have been ingested and what still needs doing
+Read CLAUDE.md and Learning Logs/[date — module — phase].md
+Pick up where we left off.
 ```
 
-### Cross-module connections
+### Finding cross-module connections
 ```
-Look through Knowledge Base/Concepts/ and find any notes from other modules that connect to [topic]. Add [[links]] between them
+Read all notes in Knowledge Base/Concepts/ and find concepts that appear
+in multiple modules but aren't yet linked. Add [[WikiLinks]] between them.
+```
+
+### Querying your knowledge base
+```
+Read Knowledge Base/Concepts/[folder]/ and explain how [concept A]
+and [concept B] relate to each other.
 ```
 
 ### Feeding notes to another AI
 ```
-Read all notes in Knowledge Base/Concepts/[folder]/ and give me a single clean summary I can paste into another AI
+Read all notes in Knowledge Base/Concepts/[folder]/ and produce a single
+clean summary block I can paste into another AI model as context.
+```
+
+### Ending a session
+```
+Write a learning log for this session and save it to
+Learning Logs/[YYYY-MM-DD] — [Module] — [Phase] — [Topic].md
+Use the template in Templates/Learning-Log.md
 ```
 
 ---
 
-## Setting Up Obsidian
+## 5. The Three Types of Notes
+
+The Knowledge Base has three distinct note types. Each one serves a different purpose.
+
+### Concept Notes (Concepts/)
+Atomic, single-concept files in Zettelkasten format. The backbone of the system.
+
+```markdown
+# Hash Functions
+
+## What is it?
+One sentence definition.
+
+## The Analogy
+A meat grinder. One-way, deterministic, irreversible.
+
+## Key points
+- Tables, bullets, facts
+- Links to related concepts
+
+## Connected concepts
+- [[Salting]]
+- [[HMAC]]
+- [[Digital Signatures]]
+```
+
+**Use for:** Quick lookup, following concept chains, Obsidian graph, querying with Claude, feeding to AI models.
+**Not for:** Reading a whole topic from start to finish.
+
+---
+
+### Study Guides (Study Guides/)
+Narrative, flowing documents covering an entire module. Designed to be read.
+
+> Written in full sentences and paragraphs, not bullets.
+> Every concept explained with its analogy, context, and connections.
+> Like a well-written textbook chapter — but generated from your actual module content.
+
+**Use for:** First pass learning, revision before exams, sharing with others.
+**Not for:** Quick lookup or querying — too long for that.
+
+---
+
+### MOCs — Maps of Content (MOC/)
+Navigation hubs. One per module. Lists every concept note for that module with links.
+
+**Use for:** Getting an overview, jumping to specific concept areas, tracking Phase 2 and 3 progress checklists.
+
+---
+
+## 6. Setting Up Obsidian
 
 ### Which folder to open as your vault
-Open **`Knowledge Base/`** as your Obsidian vault — not the whole project folder.
+**Open `Knowledge Base/` only** — not the whole project folder.
 
 ```
-Obsidian → Open folder as vault → select:
+Obsidian → Open folder as vault →
 /Users/syedimaduddin/Documents/Claude/Cybersecurity Second Brain/Knowledge Base/
 ```
 
-> **Why just Knowledge Base?** Because Obsidian is for reading and navigating your notes — not your raw slides or system files. Keeping it clean means a better graph view and faster search.
+Why not the whole folder? Raw Materials, logs, and system files would clutter the graph and search. Knowledge Base is clean notes only.
 
-### First time setup in Obsidian
-1. Open Obsidian
-2. Click **Open folder as vault**
-3. Navigate to `Cybersecurity Second Brain/Knowledge Base/`
-4. Click Open
+### Recommended plugins
 
-### Recommended plugins to install
-Go to **Settings → Community Plugins → Browse** and install:
+| Plugin | What it does |
+|--------|-------------|
+| **Dataview** | Query notes like a database — filter by tag, module, status |
+| **Templater** | Auto-fill note templates when creating new notes |
+| **Spaced Repetition** | Built-in flashcard review at increasing intervals |
+| **Calendar** | Visual tracker of which days you studied |
+| **Graph View** | Built-in — see your entire knowledge web as a visual graph |
 
-| Plugin | What it does | Why you need it |
-|--------|-------------|-----------------|
-| **Dataview** | Query your notes like a database | See all notes by status, module, topic |
-| **Templater** | Auto-fill note templates | Consistent note structure every time |
-| **Spaced Repetition** | Built-in flashcard review | Review notes before you forget them |
-| **Calendar** | Track daily study sessions | See which days you studied |
-| **Graph View** | Built-in — shows note connections | See your knowledge web visually |
+### Key views in Obsidian
 
-### Useful Obsidian views
+**Graph View (Cmd+G):** Every note is a node. Every `[[link]]` is a connection. As you add modules, the graph grows denser. Topics with many connections are your core knowledge. Isolated nodes need more linking.
 
-**Graph view** (Ctrl/Cmd + G): Shows all your notes as nodes with lines connecting linked concepts. The more you study, the denser and more connected the graph becomes. This is what a second brain looks like visually.
+**Search (Cmd+F):** Full-text search across all notes instantly. Search `#topic/hashing` to see all hashing notes. Search `AES` to see every note that mentions AES.
 
-**Dataview query** — paste this into any note to see all reviewed notes:
+**Dataview — paste these into any note:**
+
+See all notes for a module:
 ````
 ```dataview
-TABLE file.mtime as "Last reviewed"
+TABLE tags
 FROM "Concepts"
-WHERE contains(tags, "reviewed")
-SORT file.mtime DESC
+WHERE contains(tags, "WM242")
+SORT file.name ASC
 ```
 ````
 
-**Search** (Ctrl/Cmd + F): Search across every note instantly. Type "AES" and every note that mentions AES appears.
+See everything not yet reviewed:
+````
+```dataview
+LIST
+FROM "Concepts"
+WHERE !contains(tags, "reviewed")
+```
+````
 
 ---
 
-## How the Notes Are Structured
+## 7. Learning Methods
 
-Every note Claude generates follows the same format:
+Four methods in order of effectiveness. Don't skip straight to passive reading.
 
-```markdown
-# [Concept Name]
+### Method 1 — Read the Study Guide (passive — first pass only)
+Open `Knowledge Base/Study Guides/[Module] — Study Guide.md` and read through once. This gives you the mental map before anything else. Don't rely on this alone — retention from reading alone is poor.
 
-**Module:** [[WM242 Implementing Secure Systems]]
-**Tags:** #module/WM242 #year/2 #topic/hashing #status/reviewed
+### Method 2 — Active Recall (strongest — do this always)
+The most evidence-backed learning method. Forces retrieval rather than recognition.
+
+**How:**
+1. Close everything
+2. Open a blank document
+3. Write everything you remember about the topic — no peeking
+4. Bring it back to Claude
+
+**Prompt:**
+```
+Here's my active recall on [topic]: [paste]
+Tell me exactly: what I got wrong, what I missed, what was vague.
+Be specific — not "you missed hashing" but "you didn't mention preimage resistance".
+```
+
+The discomfort of not remembering is the learning happening. That's the point.
+
+Do this **24 hours after** the Study Guide pass — not immediately.
+
+### Method 3 — Feynman Technique (find fake understanding)
+Explain it out loud as if teaching someone who knows nothing. Wherever your explanation breaks down is where your understanding breaks down.
+
+**Prompt:**
+```
+I'm going to explain [concept] as if teaching it to a complete beginner.
+Tell me where my explanation is wrong, vague, or where I'm faking understanding.
+[your explanation]
+```
+
+### Method 4 — Scenario Testing (application under pressure)
+Exam-style questions in realistic scenarios. Moves you from "I understand this" to "I can use this".
+
+**Prompt:**
+```
+Give me a scenario-based question on [topic].
+One at a time. Wait for my full answer before giving feedback.
+```
+
+Example question:
+> *A company stores passwords as unsalted MD5 hashes. Their database is breached.
+> What attack is now possible? Why does the lack of salt make it significantly worse?
+> What should they have done instead?*
+
+### Method 5 — Spaced Repetition (long-term retention)
+Use Obsidian's Spaced Repetition plugin to review notes at: 1 day → 3 days → 1 week → 2 weeks → 1 month.
+
+This keeps knowledge in long-term memory with minimal time investment per session.
 
 ---
 
-## What is it?
-One sentence. No jargon.
+## 8. Querying the Knowledge Base
 
-## The Analogy
-A simple, relatable comparison from everyday life.
+Querying is getting information back out. Two tools: Obsidian for navigation, Claude for synthesis.
 
-## [Main content]
-Tables, bullet points, key facts — never walls of text.
+### Obsidian (navigation and lookup)
+- **Cmd+F** — find any concept instantly
+- **Cmd+G** — graph view — see connections visually
+- **Dataview** — filter and list notes by any tag or property
+- **Backlinks panel** — see every note that links to the current one
 
-## Connected concepts
-- [[Related Note 1]] — why it's related
-- [[Related Note 2]] — why it's related
+### Claude (synthesis and reasoning)
 
----
-*Source: WM242 Week X | Last reviewed: [date]*
+**Compare two concepts:**
+```
+Read Knowledge Base/Concepts/ and compare RSA and ECC.
+When would you choose one over the other, and why?
 ```
 
-**The `[[double bracket]]` links** are Obsidian WikiLinks. Click any of them in Obsidian and it takes you directly to that note. This is what creates the web.
-
-**The tags** let you filter and query:
-- `#module/WM242` — filter by module
-- `#year/2` — filter by year
-- `#topic/hashing` — filter by topic
-- `#status/reviewed` — filter by what you've studied
-
----
-
-## The Learning Phases
-
-Every module goes through three phases. Don't skip them — each one does something different in your brain.
-
-### Phase 1 — Ingestion (Claude teaches you)
-**What:** Claude reads all raw materials and generates Zettelkasten notes.
-**You do:** Read through the notes Claude created. Ask for clarification on anything unclear.
-**Output:** A mental map of the module. 20–40 atomic notes in Knowledge Base.
-**Time:** 1–2 hours per module.
-
-### Phase 2 — Active Recall (you retrieve, Claude corrects)
-**What:** You close all notes and write everything you can remember from scratch.
-**You do:** Open a blank document. Write every concept you remember — no peeking. Bring it back to Claude. Claude tells you what you missed and what was wrong.
-**Why it matters:** The act of retrieving information strengthens memory far more than re-reading. The discomfort of not remembering IS the learning happening.
-**Time:** 45–60 minutes, done 24 hours after Phase 1.
-
-Prompt to use:
+**Find connections you haven't spotted:**
 ```
-I've done active recall on WM242. Here's what I wrote: [paste your notes]
-Tell me what I got wrong, what I missed, and what needs more detail
+Read all notes in Knowledge Base/Concepts/ and tell me which concepts
+from different topic folders are closely related but not yet linked.
 ```
 
-### Phase 3 — Testing (scenario questions)
-**What:** Claude generates exam-style questions. You write full answers. Claude gives feedback.
-**You do:** Treat it like a real exam. Write complete answers, not bullet points.
-**Why it matters:** Moves you from "I understand this" to "I can apply this under pressure."
-**Time:** 1 hour per module.
-
-Prompt to use:
+**Topic summary for another AI:**
 ```
-Quiz me on WM242 with 3 scenario-based questions. One at a time. Wait for my answer before the next question.
+Read Knowledge Base/Concepts/Hashing/ and produce a single clean block
+I can paste into another AI as context — no fluff, just the key facts.
 ```
 
-### Spaced Repetition — ongoing
-After Phase 3, use Obsidian's Spaced Repetition plugin to review notes at:
-- 1 day after creation
-- 3 days later
-- 1 week later
-- 2 weeks later
-- 1 month later
+**Identify weak areas in your notes:**
+```
+Read all notes in Knowledge Base/Concepts/[folder]/ and tell me which ones
+are thinnest — least detail, missing analogies, or fewest links.
+```
 
-This keeps knowledge in long-term memory with minimal time investment.
+**Cross-module synthesis (Year 3+ power feature):**
+```
+Read all notes in Knowledge Base/Concepts/ and explain how the concept of
+"trust" appears differently in PKI, SSO, blockchain, and network security.
+```
+
+No search engine or textbook can do that last one. That's the second brain working as intended.
 
 ---
 
-## GitHub — Pushing Updates
+## 9. Learning Logs — Continuing Across Sessions
 
-The repo is already initialised with git. After any session where Claude adds new notes:
+Learning Logs solve the continuity problem. Claude has no memory between sessions. Logs give it that memory.
 
-```bash
-cd "/Users/syedimaduddin/Documents/Claude/Cybersecurity Second Brain"
-git add -A
-git commit -m "Add [description of what was added]"
-git push
+### Every session starts with:
+```
+Read CLAUDE.md and my latest log in Learning Logs/
+[then tell Claude what you want to do today]
 ```
 
-### First-time push (if not done yet)
-1. Go to [github.com/new](https://github.com/new)
-2. Name it `cybersecurity-second-brain`
-3. Set to **Public**, tick nothing else
-4. Click Create repository
-5. Run:
+Claude reads where you left off, what you struggled with, and the exact pickup instruction from the previous session.
+
+### Every session ends with:
+```
+Write a learning log for this session using Templates/Learning-Log.md
+Save it to Learning Logs/[YYYY-MM-DD] — [Module] — [Phase] — [Topic].md
+```
+
+### What a log captures:
+- What was covered
+- What analogies and approaches worked well (so they're reused)
+- What didn't click and needs revisiting
+- Gaps and weak areas to probe next time
+- Exact instruction for where to pick up
+
+### Querying across all logs:
+```
+Read all files in Learning Logs/ and tell me:
+- Which topics have I covered?
+- Which ones have I consistently struggled with?
+- What's incomplete or hasn't had Phase 2/3 yet?
+- Where should I start today?
+```
+
+---
+
+## 10. GitHub
+
+### First-time push
+1. Create repo at [github.com/new](https://github.com/new) — name: `cybersecurity-second-brain`, Public
+2. Run:
 ```bash
 cd "/Users/syedimaduddin/Documents/Claude/Cybersecurity Second Brain"
 git remote add origin https://github.com/YOUR-USERNAME/cybersecurity-second-brain.git
 git push -u origin main
 ```
 
-### What gets pushed / what doesn't
+### Regular updates (after any session)
+```bash
+git add -A
+git commit -m "Add [description]"
+git push
+```
 
-| Included in GitHub | Excluded (stays local only) |
-|-------------------|----------------------------|
-| All Knowledge Base notes (.md) | Raw PDFs |
-| README, CLAUDE.md, SYSTEM.md | ZIP files |
-| Templates | MP4 lecture videos |
-| Folder structure | Database files |
+### What's on GitHub vs what stays local
 
-This means GitHub shows your clean knowledge base — a public portfolio of what you know — without exposing your university's lecture materials.
+| Pushed to GitHub | Stays local only |
+|-----------------|-----------------|
+| All Knowledge Base notes | Raw PDFs |
+| Study Guides | ZIP files |
+| Learning Logs | MP4 lecture videos |
+| README, CLAUDE.md, SYSTEM.md | Database files |
+| Templates + folder structure | |
 
 ### GitHub Pages (optional)
-Turn your README into a live webpage:
-Settings → Pages → Source: main branch → Save
-Your repo becomes a website at: `https://YOUR-USERNAME.github.io/cybersecurity-second-brain`
+Settings → Pages → Source: main → Save
+Creates a live website at: `https://YOUR-USERNAME.github.io/cybersecurity-second-brain`
 
 ---
 
-## Progress Tracker
+## 11. Progress Tracker
 
-| Module | Raw Materials | Phase 1 | Phase 2 | Phase 3 | Notes in KB |
+| Module | Raw Materials | Phase 1 | Phase 2 | Phase 3 | Notes |
 |--------|:---:|:---:|:---:|:---:|:---:|
-| **Y2 — WM242 Implementing Secure Systems** | ✅ | ✅ | ⬜ | ⬜ | 20 |
-| Y1 — Module 1 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y1 — Module 2 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y1 — Module 3 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y1 — Module 4 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y1 — Module 5 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y1 — Module 6 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y2 — Modules 2–6 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y3 — Modules 1–6 | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Y3 — Dissertation | ⬜ | — | — | — | 0 |
-| TryHackMe | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
-| Work & Internships | ⬜ | ⬜ | ⬜ | ⬜ | 0 |
+| **Y2 — WM242 ISS** | ✅ | ✅ | ⬜ | ⬜ | 20 concept notes, 1 study guide |
+| Y1 — Modules 1–6 | ⬜ | ⬜ | ⬜ | ⬜ | Awaiting materials |
+| Y2 — Modules 2–6 | ⬜ | ⬜ | ⬜ | ⬜ | Awaiting materials |
+| Y3 — Modules 1–6 | ⬜ | ⬜ | ⬜ | ⬜ | Awaiting materials |
+| Y3 — Dissertation | ⬜ | — | — | — | Awaiting topic |
+| TryHackMe | ⬜ | ⬜ | ⬜ | ⬜ | Ongoing |
+| Work & Internships | ⬜ | ⬜ | ⬜ | ⬜ | Ongoing |
 
 ---
 
-## Dos and Don'ts
+## 12. Dos and Don'ts
 
 ### ✅ Do
-- **Drop raw files and let Claude handle them.** Don't try to summarise slides yourself first.
-- **Open only `Knowledge Base/` in Obsidian** — not the whole project.
-- **Do Phase 2 at least 24 hours after Phase 1.** Sleep on it. The gap is the point.
-- **Push to GitHub regularly.** It's version control — you can always roll back if something gets messy.
-- **Tell Claude when an analogy doesn't click.** It will find a different one. This is the whole point of CLAUDE.md.
-- **Add TryHackMe writeups to Raw Materials/Courses/TryHackMe/** and ask Claude to turn them into notes — practical knowledge belongs in the Knowledge Base too.
+- **Always start with:** `Read CLAUDE.md and my latest Learning Log`
+- **Open only `Knowledge Base/` in Obsidian** — not the whole project
+- **Do Phase 2 at least 24 hours after Phase 1** — sleep on it, the gap matters
+- **End every session with a log** — even a short one. Future you will thank you
+- **Tell Claude when an analogy doesn't land** — it will find a better one
+- **Push to GitHub after every session** — version control protects your work
+- **Add TryHackMe writeups to Raw Materials** — practical knowledge belongs in the system too
 
 ### ❌ Don't
-- **Don't copy lecture slides into Knowledge Base.** Raw content is not the second brain — processed notes are.
-- **Don't skip the analogy step.** If a note doesn't have an analogy, ask Claude to add one.
-- **Don't push raw PDFs or videos to GitHub.** The `.gitignore` blocks them but be aware.
-- **Don't try to do everything at once.** One module at a time, all three phases, before moving on.
-- **Don't open the whole project folder in Obsidian.** You'll get noise from README files and system docs mixed in with your notes.
-- **Don't invent your own note format.** Use the template in `Templates/Concept-Note.md` — consistency is what makes Obsidian's graph and search powerful.
+- **Don't skip active recall** — reading is not learning
+- **Don't open the whole project folder in Obsidian** — noise from system files clutters everything
+- **Don't start a session without reading your latest log** — you'll repeat yourself and lose continuity
+- **Don't copy raw slides into Knowledge Base** — processed notes only
+- **Don't push PDFs or videos to GitHub** — `.gitignore` blocks them but be aware
+- **Don't try to do everything at once** — one module, all three phases, before moving to the next
 
 ---
 
-## Quick Reference Card
+## 13. Quick Reference Card
 
 | Task | Where | Prompt / Action |
 |------|-------|----------------|
+| Start any session | Claude Code | `Read CLAUDE.md and my latest log in Learning Logs/` |
 | Add new module files | `Raw Materials/Year X/Module Y/` | Drag and drop |
-| Ingest a module | Claude Code in this folder | `"Read CLAUDE.md, ingest Raw Materials/Year X/Module Y/"` |
-| Study notes | `Knowledge Base/` in Obsidian | Open vault, browse or search |
-| Active recall | Blank document → Claude | `"Here's my recall: [paste]. What did I miss?"` |
-| Get quizzed | Claude Code | `"Quiz me on [topic] one question at a time"` |
-| Add a specific note | Claude Code | `"Create a Zettelkasten note for [concept]"` |
+| Ingest a module | Claude Code | `Read CLAUDE.md and ingest Raw Materials/Year 2/Module 2 - [name]/` |
+| Read and learn | `Knowledge Base/Study Guides/` in Obsidian | Open the study guide, read top to bottom |
+| Look up a concept | `Knowledge Base/Concepts/` in Obsidian | Cmd+F search |
+| See knowledge graph | Obsidian | Cmd+G |
+| Active recall | Claude Code | `Here's my recall: [paste]. What did I miss?` |
+| Get quizzed | Claude Code | `Quiz me on [topic] one question at a time` |
+| End session + log | Claude Code | `Write a learning log for this session` |
+| Query across all notes | Claude Code | `Read Knowledge Base/Concepts/ and [question]` |
+| Feed notes to AI | Claude Code | `Summarise Knowledge Base/Concepts/[folder]/ into one clean block` |
 | Push updates | Terminal | `git add -A && git commit -m "..." && git push` |
-| See all notes linked | Obsidian | Cmd+G (Graph view) |
-| Find a concept fast | Obsidian | Cmd+F (search) |
-| Feed notes to another AI | Claude Code | `"Summarise all notes in Knowledge Base/Concepts/[folder]/ into one block"` |
 
 ---
 
 *Started: June 2026 | Syed Imad Uddin*
-*AI assistant: Claude Code*
-*Stack: Obsidian · Zettelkasten · GitHub*
+*Stack: Obsidian · Zettelkasten · Claude Code · GitHub*

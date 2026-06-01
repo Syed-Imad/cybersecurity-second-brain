@@ -133,3 +133,20 @@ Always confirm at the start of a session:
 - Do NOT dump everything at once. Teach one topic at a time, confirm understanding, then move on.
 - DO flag if a concept in a new module connects to something already learned — cross-linking is key to Zettelkasten.
 - DO be honest about complexity. Some topics are genuinely hard. Say so and go slower.
+
+---
+
+## Learning Logs Protocol
+
+At the START of every session:
+1. Read `CLAUDE.md` (this file)
+2. Read the most recent log in `Learning Logs/` to understand where to pick up
+3. Confirm with Syed: "I've read your last log from [date]. We left off at [X]. Ready to continue?"
+
+At the END of every session (or when Syed asks):
+- Write a log using `Templates/Learning-Log.md` as the format
+- Save to `Learning Logs/YYYY-MM-DD — [Module] — [Phase] — [Topic].md`
+- Update the log table in `Learning Logs/README.md`
+
+**Never start a session without reading the latest log first.**
+It contains: what was covered, what didn't click, weak areas to probe, and exact instructions for where to pick up.
