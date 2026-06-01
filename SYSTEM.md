@@ -238,7 +238,7 @@ Obsidian's Spaced Repetition plugin can automate this.
 The `README.md` is written to work as a GitHub repository landing page.
 
 **To set up:**
-1. Create a new GitHub repo: `second-brain` or `uni-knowledge-system`
+1. Create a new GitHub repo: `cybersecurity-second-brain` or `uni-knowledge-system`
 2. Push this folder (excluding raw module materials — keep those local)
 3. Enable GitHub Pages on the repo
 4. The README becomes your public-facing system overview

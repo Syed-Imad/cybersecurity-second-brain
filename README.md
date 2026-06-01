@@ -1,6 +1,6 @@
-# Second Brain — University Knowledge System
+# Cybersecurity Second Brain
 
-> A personal knowledge base for building deep, lasting understanding across 3 years of university, work experience, and self-study — built with Obsidian, Zettelkasten, and AI-assisted learning.
+> A personal knowledge base for building deep, lasting understanding of cybersecurity across 3 years of university, work experience, and self-study — built with Obsidian, Zettelkasten, and AI-assisted learning.
 
 ---
 
@@ -129,3 +129,7 @@ Claude will read `CLAUDE.md`, pick up where you left off, and teach the content 
 ---
 
 *Started: June 2026 | Syed*
+
+---
+
+> **GitHub repo:** `cybersecurity-second-brain`
