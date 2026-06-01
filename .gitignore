@@ -1,0 +1,15 @@
+# Large media files — store locally, don't push to GitHub
+*.mp4
+*.mov
+*.avi
+*.zip
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+
+# Raw PDFs in Raw Materials (too large for GitHub — keep locally)
+Raw Materials/**/*.pdf
+
+# Keep everything in Knowledge Base (notes only — small markdown files)
+!Knowledge Base/**/*.md
