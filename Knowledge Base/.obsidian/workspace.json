@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "MOC/MOC WM242 Implementing Secure Systems.md",
+                "file": "Study Guides/WM242 Implementing Secure Systems — Study Guide.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "MOC WM242 Implementing Secure Systems"
+              "title": "WM242 Implementing Secure Systems — Study Guide"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "MOC/MOC WM242 Implementing Secure Systems.md",
+                "file": "Study Guides/WM242 Implementing Secure Systems — Study Guide.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for MOC WM242 Implementing Secure Systems"
+              "title": "Backlinks for WM242 Implementing Secure Systems — Study Guide"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "MOC/MOC WM242 Implementing Secure Systems.md",
+                "file": "Study Guides/WM242 Implementing Secure Systems — Study Guide.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from MOC WM242 Implementing Secure Systems"
+              "title": "Outgoing links from WM242 Implementing Secure Systems — Study Guide"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "MOC/MOC WM242 Implementing Secure Systems.md",
+                "file": "Study Guides/WM242 Implementing Secure Systems — Study Guide.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of MOC WM242 Implementing Secure Systems"
+              "title": "Outline of WM242 Implementing Secure Systems — Study Guide"
             }
           }
         ]
@@ -185,11 +185,11 @@
   },
   "active": "4aa899bb01aa1bc1",
   "lastOpenFiles": [
-    "Study Guides/WM242 Implementing Secure Systems — Study Guide.md",
     "Study Guides/README.md",
+    "MOC/MOC WM242 Implementing Secure Systems.md",
+    "Study Guides/WM242 Implementing Secure Systems — Study Guide.md",
     "Study Guides",
     "MOC/README.md",
-    "MOC/MOC WM242 Implementing Secure Systems.md",
     "Index/README.md"
   ]
 }

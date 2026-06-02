@@ -1,260 +1,1377 @@
-# WM242 Implementing Secure Systems — Study Guide
+# WM242 — Implementing Secure Systems
+### Complete Study Guide
 
-**Module:** WM242 | **Year:** 2 | **Generated:** June 2026
-**Atomic notes:** [[MOC WM242 Implementing Secure Systems]]
-**Status:** Phase 1 complete
+```
+╔══════════════════════════════════════════════════════════════╗
+║          IMPLEMENTING SECURE SYSTEMS  ·  WM242               ║
+║          Year 2  ·  Warwick  ·  Generated June 2026          ║
+╚══════════════════════════════════════════════════════════════╝
+```
 
-> This is the readable version. Read this to learn. Use the Concepts notes to query and link.
-> Everything here is explained with analogies and examples — no walls of jargon.
-
----
-
-## Part 1 — What Cryptography Is and Why It Exists
-
-Cryptography is the science of securing communication. The word comes from the Greek *kryptos* (hidden) and *graphi* (information). At its core, it's about transforming information so that only the intended recipient can understand it.
-
-Before we get into the mechanics, it helps to understand what we're protecting against. There are four core threats in any communication:
-
-**Eavesdropping** — someone intercepts your message and reads it. Alice sends a love letter to Bob; Eve reads it in transit. Cryptography's answer: encrypt the message so Eve reads gibberish.
-
-**Tampering** — someone intercepts your message and changes it. Alice sends a bank transfer for £100; Eve changes it to £10,000. Cryptography's answer: hashing and message authentication codes prove whether a message was altered.
-
-**Impersonation** — someone pretends to be you. Eve sends Bob a message claiming to be Alice. Cryptography's answer: digital signatures prove the identity of the sender.
-
-**Replay attacks** — someone captures a legitimate message and sends it again later. Cryptography's answer: timestamps and nonces (one-time values) make replays detectable.
-
-The three pillars everything maps back to are the **CIA Triad**:
-- **Confidentiality** — only authorised parties can read the data
-- **Integrity** — data hasn't been altered
-- **Availability** — the system works when you need it
-
-Claude Shannon — the father of information theory — identified two principles that underpin every modern cipher. **Confusion** means making the relationship between the key and the ciphertext as complex as possible, so knowing the ciphertext tells you nothing about the key. **Diffusion** means spreading the influence of each plaintext character across the whole ciphertext, so patterns in the original message are hidden. Every strong cipher uses both. AES, which you'll meet shortly, is a masterclass in applying them.
+> **How to use this guide**
+> Read it top to bottom for a first pass. Then close it and do active recall.
+> For quick lookups, use the Concepts notes. For navigation, use the MOC.
+> → [[MOC WM242 Implementing Secure Systems]]
 
 ---
 
-## Part 2 — The First Ciphers (and Why They Failed)
+## Table of Contents
 
-The earliest ciphers were **substitution** ciphers — replace each letter with another. The most famous is the **Caesar cipher**, used by Julius Caesar, where every letter is shifted by a fixed number. Shift by 3 and A becomes D, B becomes E, and so on. Encryption is just `(x + n) mod 26`. Simple, elegant, and completely broken by modern standards — there are only 25 possible keys, so a computer breaks it instantly.
-
-The **Vigenère cipher** improved on this by using a keyword. Each letter of the message is shifted by the corresponding letter of the keyword, so the same letter in the message gets encrypted differently each time the keyword cycles. Harder to break but still vulnerable to frequency analysis.
-
-The **One-Time Pad** is theoretically unbreakable — XOR each character of the message with a truly random key of the same length, never reuse the key. The catch: the key must be genuinely random, as long as the message, and shared securely in advance. At scale, this is impractical.
-
-**Transposition ciphers** work differently — the letters stay the same but their positions change. The **Rail Fence cipher** writes the message in a zigzag across N rows and reads off row by row. "SECRET MESSAGE" across 3 rails becomes "SESEERTESGCMA".
-
-**Frequency analysis** is how you break substitution ciphers. In English, E appears roughly 13% of the time, T about 9%, A about 8%. Find the most frequent symbol in a ciphertext and it's likely E. Work outward from there. Al-Kindi, a 9th-century Arab scholar, invented this technique — it remained the primary cryptanalysis tool for centuries.
+| # | Topic | Key concept |
+|---|-------|-------------|
+| [1](#1--what-cryptography-is-and-why-it-exists) | What Cryptography Is | CIA Triad, Shannon's principles |
+| [2](#2--classical-ciphers) | Classical Ciphers | Caesar, Vigenère, OTP, Rail Fence |
+| [3](#3--symmetric-cryptography) | Symmetric Cryptography | AES, DES, modes, padding |
+| [4](#4--hash-functions) | Hash Functions | SHA-256, salting, HMAC |
+| [5](#5--asymmetric-cryptography) | Asymmetric Cryptography | RSA, Diffie-Hellman |
+| [6](#6--key-management) | Key Management | Lifecycle, KDFs, storage |
+| [7](#7--digital-signatures--pki) | Digital Signatures & PKI | Signing, CA, X.509, CRL |
+| [8](#8--security-protocols) | Security Protocols | TLS, PGP, SSH, IPSec |
+| [9](#9--sso--authentication) | SSO & Authentication | OAuth, SAML, OIDC, MFA |
+| [10](#10--cryptanalysis) | Cryptanalysis | Attack types, differential, linear |
+| [11](#11--quantum--post-quantum) | Quantum & Post-Quantum | QKD, BB84, PQC families |
+| [12](#12--homomorphic-encryption) | Homomorphic Encryption | PHE, FHE, noise |
+| [13](#13--elliptic-curve-cryptography) | Elliptic Curve Cryptography | ECDSA, ECDH, ECC vs RSA |
+| [14](#14--secure-system-design) | Secure System Design | 8 principles, STRIDE |
+| [15](#15--legal-ethical--regulatory) | Legal & Ethical | GDPR, PCI-DSS, backdoors |
 
 ---
 
-## Part 3 — Symmetric Cryptography (One Key for Both)
+## 1 · What Cryptography Is and Why It Exists
 
-Symmetric cryptography uses a single secret key shared between sender and receiver. Think of a padlock where the same key locks and unlocks it. Fast, efficient, great for encrypting large amounts of data. The problem: how do you securely share that key in the first place?
+> **The one-liner:** Cryptography is the science of securing communication by transforming information so only intended parties can read it.
 
-### DES — The First Standard
+### The Problem It Solves
 
-**DES (Data Encryption Standard)** was developed by IBM in the early 1970s and became the US federal standard. It uses a **56-bit key** and a **64-bit block size**, structured as a **Feistel network** — a clever design where the same algorithm works for both encryption and decryption just by reversing the key schedule. Each of its 16 rounds splits the data in half, applies a function to the right half using a subkey, XORs the result with the left half, then swaps them.
+Imagine sending a postcard. Anyone who handles it — the postal worker, a nosy neighbour — can read it. The internet works the same way. Data hops across dozens of servers before reaching its destination. Without cryptography, every hop is a postcard.
 
-The problem: 56 bits is too short. By the late 1990s, hardware had advanced to the point where all 2⁵⁶ possible keys could be searched in a matter of hours. DES is now considered obsolete.
+```
+WITHOUT CRYPTO                    WITH CRYPTO
+─────────────                     ───────────
+Alice ──[HELLO]──► Router         Alice ──[X9#mK]──► Router
+                     │                                  │
+                   Eve ← reads it                     Eve ← sees gibberish
+                     │                                  │
+              ──[HELLO]──► Bob                  ──[X9#mK]──► Bob
+                                                            │
+                                                        decrypts → HELLO
+```
 
-### AES — The Current Standard
+### The Four Threats
 
-**AES (Advanced Encryption Standard)** was designed by Belgian cryptographers Vincent Rijmen and Joan Daemen, adopted by NIST in 2000, and is now used everywhere — HTTPS, VPNs, Wi-Fi, file encryption, messaging apps. Unlike DES it is not a Feistel network; it's a **substitution-permutation network** operating on a 4×4 matrix of bytes.
+| Threat | What happens | Cryptography's answer |
+|--------|-------------|----------------------|
+| **Eavesdropping** | Eve intercepts and reads the message | Encryption — Eve reads gibberish |
+| **Tampering** | Eve changes the message in transit | Hashing / MACs — alteration is detectable |
+| **Impersonation** | Eve pretends to be Alice | Digital signatures — only Alice has her private key |
+| **Replay attacks** | Eve re-sends a captured message later | Timestamps and nonces — old messages are rejected |
 
-Key sizes are 128, 192, or 256 bits. The 128-bit version has 10 rounds, 192 has 12, 256 has 14. Each main round applies four operations:
+### The CIA Triad
 
-1. **SubBytes** — every byte is replaced using a fixed lookup table (the S-box). This is confusion — the relationship between input and output is non-linear and complex.
-2. **ShiftRows** — the rows of the 4×4 matrix are shifted left by 0, 1, 2, and 3 positions respectively. This moves bytes into different columns, spreading their influence.
-3. **MixColumns** — each column is multiplied by a fixed matrix over a finite field. This is the heaviest diffusion step — one byte affects all four bytes in its column.
-4. **AddRoundKey** — the state is XORed with the round subkey derived from the original key.
+```
+              Confidentiality
+                    ▲
+                   / \
+                  /   \
+                 /     \
+                /       \
+               ▼         ▼
+          Integrity ── Availability
+```
 
-The **final round** skips MixColumns. The **initial round** only does AddRoundKey. This is a common exam question — know which operation is omitted in the final round.
+| Pillar | Meaning | Example threat |
+|--------|---------|----------------|
+| **Confidentiality** | Only authorised parties can read the data | Eavesdropping |
+| **Integrity** | Data hasn't been altered | Tampering |
+| **Availability** | System works when you need it | DDoS attack |
+
+### Shannon's Two Principles
+
+Claude Shannon — father of information theory — identified the foundations of every strong cipher:
+
+| Principle | Meaning | Example in AES |
+|-----------|---------|----------------|
+| **Confusion** | Complex relationship between key and ciphertext | SubBytes operation |
+| **Diffusion** | Each plaintext bit influences many ciphertext bits | ShiftRows + MixColumns |
+
+> **Why this matters:** A cipher that lacks confusion is vulnerable to key analysis. One that lacks diffusion leaks patterns from the plaintext. AES uses both aggressively — that's why it's unbroken.
+
+---
+
+## 2 · Classical Ciphers
+
+> **The one-liner:** Early ciphers either replaced letters (substitution) or shuffled them (transposition). Both are easily broken today.
+
+### Two Fundamental Approaches
+
+```
+SUBSTITUTION — letters change, positions stay
+─────────────────────────────────────────────
+Plaintext:   H E L L O
+             ↓ ↓ ↓ ↓ ↓   (shift by 3)
+Ciphertext:  K H O O R
+
+TRANSPOSITION — positions change, letters stay
+───────────────────────────────────────────────
+Plaintext:   S E C R E T
+             (rearranged across rails)
+Ciphertext:  S C E E R T
+```
+
+### The Four Classic Ciphers
+
+#### Caesar Cipher
+```
+Alphabet:   A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+Shift n=3:  D E F G H I J K L M N O P Q R S T U V W X Y Z A B C
+
+HELLO  →  KHOOR
+```
+
+| Property | Detail |
+|----------|--------|
+| Type | Substitution |
+| Key | Shift value n (0–25) |
+| Formula | E(x) = (x + n) mod 26 |
+| Weakness | Only 25 possible keys — brute forced in seconds |
+
+#### Vigenère Cipher
+Uses a keyword. Each letter of the message is shifted by the corresponding keyword letter, cycling if needed.
+
+```
+Message:  H E L L O
+Keyword:  D O G D O
+          ↓ ↓ ↓ ↓ ↓
+Result:   K S R O C
+```
+
+Harder than Caesar, but still broken by frequency analysis once you know the keyword length (found via Kasiski examination).
+
+#### One-Time Pad (Vernam Cipher)
+```
+Message:  01001000  (H)
+Key:      11010110  (random)
+XOR:      10011110  (ciphertext)
+```
+
+| Property | Detail |
+|----------|--------|
+| Security | **Theoretically unbreakable** |
+| Requirement | Key must be: truly random, same length as message, used only once |
+| Weakness | Key distribution is impractical at scale |
+
+#### Rail Fence Cipher
+
+Message: `SECRET MESSAGE` across 3 rails:
+
+```
+Rail 1:  S . . . R . . . S . . . E
+Rail 2:  . E . C . E . M . S . A .
+Rail 3:  . . . T . . . E . . G . .
+
+Read rows: SRSE + ECEMSA + TEG  →  SESEERTESGCMA
+```
+
+### How to Break Them — Frequency Analysis
+
+```
+English letter frequency (approximate):
+E ████████████ 13%
+T ████████     9%
+A ███████      8%
+O ███████      8%
+I ██████       7%
+N ██████       7%
+...
+```
+
+**Method:** Count the most frequent symbol in ciphertext → likely E. Work outward using common patterns:
+- Single-letter words: **A**, **I**
+- Common 2-letter words: of, to, in, it, is, be
+- Common 3-letter words: **the**, **and**
+- Common doubled letters: ss, ee, tt, ll, oo
+
+---
+
+## 3 · Symmetric Cryptography
+
+> **The one-liner:** One shared key encrypts and decrypts. Fast and efficient — but both parties need the same key, which creates a distribution problem.
+
+```
+      ┌─────────┐    SECRET KEY    ┌─────────┐
+      │  ALICE  │ ←────────────── │   BOB   │
+      └────┬────┘                 └────┬────┘
+           │                           │
+    Encrypt with key             Decrypt with key
+           │                           │
+           └──────► CIPHERTEXT ────────┘
+```
+
+| Property | Detail |
+|----------|--------|
+| Keys | 1 shared secret key |
+| Speed | Fast — good for large data |
+| Weakness | Key distribution problem |
+| Non-repudiation | ✗ Cannot prove which party sent a message |
+
+### DES — Data Encryption Standard
+
+```
+╔════════════════════════════════════╗
+║  DES — OBSOLETE. DO NOT USE.       ║
+║  Key: 56 bits  Block: 64 bits      ║
+║  Structure: Feistel Network        ║
+║  Rounds: 16                        ║
+╚════════════════════════════════════╝
+```
+
+**The Feistel Network — one round:**
+```
+Input block (64 bits)
+         │
+    ┌────┴────┐
+    L         R
+    │         │
+    │    ┌────┤ ← subkey Kn
+    │    │ f()│
+    │    └────┤
+    │         │
+  XOR ◄───────┘
+    │         │
+    └────┬────┘
+   new R     new L  (swapped)
+```
+
+**Why DES is broken:** 56-bit key = 2⁵⁶ possible keys ≈ 72 quadrillion. Sounds large but modern hardware brute-forces it in hours.
+
+---
+
+### AES — Advanced Encryption Standard
+
+```
+╔════════════════════════════════════════════════╗
+║  AES — THE CURRENT STANDARD                    ║
+║  Key sizes:  128 / 192 / 256 bits              ║
+║  Block size: 128 bits (4×4 byte matrix)        ║
+║  Structure:  Substitution-permutation network  ║
+╚════════════════════════════════════════════════╝
+```
+
+**AES operates on a 4×4 grid of bytes:**
+```
+┌──┬──┬──┬──┐
+│b0│b4│b8│b12│
+├──┼──┼──┼──┤
+│b1│b5│b9│b13│
+├──┼──┼──┼──┤
+│b2│b6│b10│b14│
+├──┼──┼──┼──┤
+│b3│b7│b11│b15│
+└──┴──┴──┴──┘
+```
+
+**Round structure:**
+```
+Plaintext
+    │
+    ▼
+AddRoundKey ◄── Initial round key
+    │
+    ▼  ┌─────────────────────────────────────────────────┐
+    │  │ MAIN ROUNDS (repeat 9×/11×/13× depending on key)│
+    │  │                                                  │
+    │  │  SubBytes   → replace each byte via S-box        │
+    │  │      │         (confusion)                       │
+    │  │      ▼                                           │
+    │  │  ShiftRows  → shift row i left by i positions    │
+    │  │      │         (moves bytes between columns)     │
+    │  │      ▼                                           │
+    │  │  MixColumns → multiply each column by a matrix   │
+    │  │      │         (heavy diffusion)                 │
+    │  │      ▼                                           │
+    │  │  AddRoundKey → XOR with round subkey             │
+    │  └─────────────────────────────────────────────────┘
+    │
+    ▼  ┌──────────────────────────────────────────────────┐
+    │  │ FINAL ROUND                                      │
+    │  │  SubBytes → ShiftRows → AddRoundKey              │
+    │  │  ⚠️  MixColumns is SKIPPED in the final round    │
+    │  └──────────────────────────────────────────────────┘
+    │
+    ▼
+Ciphertext
+```
+
+> ⚠️ **Exam trap:** MixColumns is omitted in the final round. This comes up constantly.
+
+**What each operation does:**
+
+| Operation | Purpose | Shannon principle |
+|-----------|---------|-------------------|
+| SubBytes | Non-linear byte substitution via S-box | Confusion |
+| ShiftRows | Rotates rows — mixes bytes across columns | Diffusion |
+| MixColumns | Linear transformation of each column | Diffusion |
+| AddRoundKey | XOR with subkey derived from master key | Key mixing |
+
+---
 
 ### Modes of Operation
 
-Block ciphers like AES encrypt exactly one fixed-size block at a time. Real messages are longer. Modes of operation define how you chain multiple block encryptions together:
+Block ciphers encrypt exactly one 128-bit block. Real messages are longer. Modes define how to chain block encryptions together.
 
-**ECB (Electronic Code Book)** encrypts each block independently. The fatal flaw: identical plaintext blocks produce identical ciphertext blocks. Encrypt a bitmap image with ECB and the shapes are still visible in the ciphertext. Never use ECB for real data.
+#### ECB — Electronic Code Book ❌
+```
+Block 1  →  [AES]  →  Cipher 1
+Block 2  →  [AES]  →  Cipher 2
+Block 3  →  [AES]  →  Cipher 3
 
-**CBC (Cipher Block Chaining)** XORs each plaintext block with the previous ciphertext block before encrypting. The first block uses a random Initialisation Vector (IV). Identical plaintexts now produce different ciphertexts. This is the most common mode for general use.
+Problem: same plaintext block = same ciphertext block
+```
 
-**CTR (Counter Mode)** encrypts a counter value and XORs it with the plaintext. Parallelizable — blocks can be encrypted simultaneously. Fast and flexible.
+> **The penguin problem:** Encrypt a bitmap image with ECB and the pixel patterns remain visible in the output. The structure of the data leaks through. Never use ECB for real data.
 
-CFB and OFB use feedback mechanisms and are error-resilient — a corrupted bit in transmission doesn't cascade into corruption of later blocks.
+#### CBC — Cipher Block Chaining ✅ (most common)
+```
+IV ──┐
+     XOR ◄── Plaintext 1  →  [AES]  →  Ciphertext 1 ──┐
+                                                         XOR ◄── Plaintext 2  →  [AES]  →  Ciphertext 2
+```
 
-When a message doesn't fill a complete final block, **padding** fills the gap. PKCS7 pads with N bytes each having the value N — if 3 bytes are needed, the padding is `03 03 03`.
+Each block's ciphertext feeds into the next block's encryption. Identical plaintexts produce different ciphertexts. Needs a random IV for the first block.
+
+#### CTR — Counter Mode ✅ (fast, parallelizable)
+```
+Counter 1  →  [AES]  →  Keystream 1  XOR  Plaintext 1  =  Ciphertext 1
+Counter 2  →  [AES]  →  Keystream 2  XOR  Plaintext 2  =  Ciphertext 2
+Counter 3  →  [AES]  →  Keystream 3  XOR  Plaintext 3  =  Ciphertext 3
+```
+
+All blocks can be encrypted simultaneously. Very fast.
+
+#### Modes Summary
+
+| Mode | Parallel? | IV needed? | Error propagation | Use |
+|------|:---------:|:----------:|:-----------------:|-----|
+| ECB | ✅ | ✗ | None | ❌ Never |
+| CBC | ✗ | ✅ | Next block corrupted | General use |
+| CFB | ✗ | ✅ | Limited | Streaming |
+| OFB | ✗ | ✅ | None | Streaming |
+| CTR | ✅ | ✅ | None | High-performance |
+
+### Padding
+
+When a message doesn't fill the final block, padding fills the gap.
+
+| Scheme | Rule | Example (3 bytes short) |
+|--------|------|------------------------|
+| **PKCS7** | Pad with N bytes each having value N | `03 03 03` |
+| **ISO 10126** | Random bytes, last byte = count | `A7 3F 03` |
+| **TBC** | If last bit = 0, pad 1s. If 1, pad 0s | `11111111` |
 
 ---
 
-## Part 4 — Hash Functions (One-Way Fingerprints)
+## 4 · Hash Functions
 
-A hash function takes any input and produces a fixed-length output — a fingerprint of the data. The best analogy is a meat grinder: put any amount of raw meat in, always get the same type of minced output. Put the same steak in twice, get identical mince. Put a slightly different steak in, get completely different mince. You can never reconstruct the original steak from the mince.
+> **The one-liner:** A one-way function that converts any input into a fixed-length fingerprint. Cannot be reversed.
 
-Three properties matter:
+```
+                    ┌──────────────┐
+"hello"  ──────────►│  SHA-256     │──────► 2cf24dba5fb0a30e...
+                    └──────────────┘
 
-**One-way (Preimage Resistance):** Given a hash output h, it should be computationally infeasible to find any input that produces h. This is why passwords are stored as hashes rather than plaintext — even if the database is stolen, the attacker can't reverse the hashes to get the passwords.
+"hellp"  ──────────►│  SHA-256     │──────► 4a8a08f09d37b73c...
+(1 bit different)   └──────────────┘        (completely different)
+```
 
-**Collision Resistance:** It should be infeasible to find two different inputs that produce the same hash. If I can find a collision, I can substitute one document for another without the hash changing — devastating for digital signatures.
+> **The meat grinder analogy:** Put any amount of raw meat in — always get the same type of minced output. Put the same cut in twice — identical mince. Put a slightly different cut in — completely different mince. You can never reconstruct the original from the mince.
 
-**Avalanche Effect:** A single bit change in the input produces a completely different output. SHA-256 of "hello" and SHA-256 of "hellp" look nothing alike. This ensures patterns in the input don't leak into the output.
+### Required Properties
 
-The algorithms: **MD5** (128-bit) and **SHA-1** (160-bit) are broken — collisions have been found. Use **SHA-256** or higher for anything security-relevant. For passwords specifically, use **Argon2** — it's intentionally slow and memory-hard, which means brute-forcing a database full of Argon2 hashes is orders of magnitude harder than SHA-256.
+| Property | Definition | If broken... |
+|----------|-----------|--------------|
+| **One-way** (preimage resistance) | Given hash h, can't find input m where H(m) = h | Attacker reverses password hashes |
+| **Collision resistance** | Can't find m1 ≠ m2 where H(m1) = H(m2) | Attacker substitutes documents undetected |
+| **Avalanche effect** | 1 bit change in input → completely different output | Patterns in plaintext leak into hash |
 
-**Salting** solves the rainbow table problem. A rainbow table is a precomputed lookup of `hash → input` for millions of common passwords. If you salt — add a random unique value to each password before hashing — the precomputed table becomes useless because every password now has a unique input even if two users share the same password.
+### The Algorithms
 
-**HMAC (Hash-based Message Authentication Code)** adds a secret key into the hash computation. A plain hash proves integrity — the data hasn't changed. An HMAC proves integrity *and* authentication — the data hasn't changed *and* it came from someone who knows the shared secret key. HMAC does two nested hash operations to prevent length extension attacks. It's used in TLS, IPsec, and SSH.
+| Algorithm | Output | Status | Use |
+|-----------|--------|--------|-----|
+| MD5 | 128-bit | ❌ **Broken** — collisions found | Legacy only |
+| SHA-1 | 160-bit | ❌ **Deprecated** | Do not use |
+| SHA-256 | 256-bit | ✅ Current standard | General purpose |
+| SHA-512 | 512-bit | ✅ Current standard | Higher security |
+| SHA-3 | Variable | ✅ Next-gen | Future-proofing |
+| **Argon2** | Variable | ✅ **Best for passwords** | Password hashing |
+
+> **Number of possible SHA-256 hashes:** 2²⁵⁶ = more atoms than in the observable universe
+
+### Salting
+
+```
+WITHOUT SALT                    WITH SALT
+────────────                    ─────────
+User A: password123             User A: password123 + x7fK9p
+         │                               │
+        SHA-256                         SHA-256
+         │                               │
+    5baa61e4...                     9a8c2f11...
+
+User B: password123             User B: password123 + mR3nP2
+         │                               │
+        SHA-256                         SHA-256
+         │                               │
+    5baa61e4...    ← SAME!          7d4b91cc...    ← DIFFERENT ✅
+```
+
+**What salting defeats:**
+
+| Attack | Without salt | With salt |
+|--------|-------------|-----------|
+| Rainbow tables | ✅ Works instantly | ❌ Fails — every hash is unique |
+| Two users same password | One crack = two accounts | Must crack each separately |
+| Dictionary attack | One pass cracks everyone | Must rehash per user |
+
+### HMAC
+
+```
+Plain hash  →  proves integrity only
+                (anyone can compute a hash)
+
+HMAC        →  proves integrity + authentication
+                (only someone with the secret key can compute it)
+
+Formula:
+HMAC = H( outer_key_pad ║ H( inner_key_pad ║ message ) )
+           └─────────────────────────────────────────┘
+                    two nested hash passes
+                    (prevents length extension attacks)
+```
+
+Used in: TLS · IPSec · SSH · API tokens
+
+### MAC vs HMAC vs Hash
+
+| | Hash | MAC | HMAC |
+|--|------|-----|------|
+| Input | Message | Message + key | Message + key |
+| Proves | Data unchanged | Integrity + auth | Integrity + auth |
+| Algorithm | Any hash fn | Block cipher (CBC-MAC) | Hash function |
+| Attack resistance | Vulnerable to length extension | Implementation dependent | Strong |
 
 ---
 
-## Part 5 — Asymmetric Cryptography (Two Keys)
+## 5 · Asymmetric Cryptography
 
-Symmetric crypto has one unsolved problem: how do you securely share the key in the first place? If you could share it securely, you wouldn't need encryption. Asymmetric cryptography solves this.
+> **The one-liner:** Two mathematically linked keys — public and private. Solves the key distribution problem that breaks symmetric crypto.
 
-The analogy: a letterbox with a slot. Anyone can post a letter through the slot (public key). Only you have the key to open the box (private key). Crucially, you can hand out a thousand copies of the slot design — it doesn't help anyone open the box.
+### The Letterbox Analogy
 
-Every user has two mathematically linked keys. Anything encrypted with the public key can only be decrypted with the private key. Anything signed with the private key can be verified with the public key. The asymmetry enables two separate use cases:
+```
+                  ┌─────────────┐
+                  │  LETTERBOX  │
+                  │             │
+Anyone can post   │  ╔═══════╗  │  Only YOU can
+a letter through  │  ║ slot  ║  │  open the box
+the slot          │  ╚═══════╝  │  with your key
+(public key)      │     [key]   │  (private key)
+                  └─────────────┘
+```
 
-- **Confidentiality:** Encrypt with recipient's public key → only they can decrypt with their private key
-- **Authentication:** Encrypt/sign with your own private key → anyone can verify with your public key, proving it came from you
+### Two Use Cases
+
+```
+CONFIDENTIALITY                          AUTHENTICATION
+───────────────                          ──────────────
+Encrypt with recipient's PUBLIC key  →   Sign with YOUR PRIVATE key
+Decrypt with recipient's PRIVATE key     Verify with YOUR PUBLIC key
+
+Anyone can encrypt to Bob.               Only Alice could have signed this.
+Only Bob can decrypt it.                 Anyone can verify it's from Alice.
+```
+
+### Asymmetric vs Symmetric
+
+| | Symmetric | Asymmetric |
+|--|-----------|-----------|
+| Keys | 1 shared | Public + private pair |
+| Speed | Fast (bulk data) | Slow (~1000× slower) |
+| Key exchange | Problem | Solved |
+| Non-repudiation | ✗ | ✅ |
+| Best for | Encrypting data | Key exchange, signatures |
+
+> **In practice — hybrid encryption:**
+> 1. Asymmetric key exchange to securely share a symmetric key
+> 2. Symmetric encryption for all actual data
+> TLS, PGP, and Signal all work this way.
+
+---
 
 ### Diffie-Hellman Key Exchange
 
-Before RSA encryption, there is Diffie-Hellman — a method for two strangers to agree on a shared secret over a public channel without ever transmitting the secret. The paint mixing analogy explains it perfectly: both parties start with the same public colour (yellow). Each adds their own private colour. They exchange the mixed colours publicly. Each then adds the other's mix to their own private colour — and both arrive at the same final colour. An observer sees yellow and two mixed colours but never the private colours or the final result.
+> **The paint mixing analogy:** Mix your private colour into the shared public colour. Exchange mixed colours publicly. Mix the other's colour with your private colour. Both arrive at the same final colour — but nobody saw either private colour or the final result.
 
-Mathematically: both agree on public numbers P (a large prime) and G (a generator). Alice picks private key a, computes G^a mod P and sends it. Bob picks private key b, computes G^b mod P and sends it. Alice raises Bob's value to the power a mod P. Bob raises Alice's value to the power b mod P. Both arrive at G^ab mod P — the shared secret. Security relies on the discrete logarithm problem: knowing G^a mod P, finding a is computationally infeasible for large enough numbers.
+```
+Alice                              Bob
+─────                              ───
+                    Agree on:
+              P = 23 (prime)
+              G = 9  (generator)
+
+a = 4 (private)                   b = 3 (private)
+x = G^a mod P                     y = G^b mod P
+  = 9^4 mod 23                      = 9^3 mod 23
+  = 6561 mod 23                      = 729 mod 23
+  = 6                                = 16
+
+           ──── exchange x=6 and y=16 publicly ────
+
+k = y^a mod P                     k = x^b mod P
+  = 16^4 mod 23                     = 6^3 mod 23
+  = 65536 mod 23                     = 216 mod 23
+  = 9  ✅                            = 9  ✅
+
+              Shared secret = 9
+```
+
+Security: knowing G, P, and x=6, finding a=4 is the discrete logarithm problem — computationally infeasible for large numbers.
+
+---
 
 ### RSA
 
-RSA is based on a simple observation: multiplying two large primes is easy, but factoring the result back into those primes is extremely hard. Given a 2048-bit number that's the product of two primes, finding those primes would take longer than the age of the universe with current computers.
+> **The core idea:** Multiplying two large primes is easy. Factoring the result back into those primes is extremely hard.
 
-Key generation: choose primes p and q, compute n = p×q (the modulus), compute φ(n) = (p−1)(q−1), choose public exponent e, find private exponent d such that d×e ≡ 1 mod φ(n). Public key is (e, n). Private key is (d, n). Encrypt with C = M^e mod n. Decrypt with M = C^d mod n.
+#### Key Generation
 
-RSA is slow — roughly 1000× slower than AES. In practice, RSA is used to exchange an AES key, and AES encrypts the actual data. This hybrid approach combines the key exchange advantage of asymmetric crypto with the speed advantage of symmetric crypto.
+```
+Step 1:  Choose primes p and q
+         p = 11,  q = 13
 
----
+Step 2:  n = p × q  (the modulus — made public)
+         n = 143
 
-## Part 6 — Key Management
+Step 3:  φ(n) = (p-1)(q-1)
+         φ(n) = 10 × 12 = 120
 
-A cryptographic system is only as secure as its key management. The strongest algorithm in the world means nothing if the key is stored in plaintext in a text file.
+Step 4:  Choose e where gcd(e, φ(n)) = 1
+         e = 7
 
-NIST SP 800-57 defines the key lifecycle in four phases: **pre-operational** (generation, certification, distribution), **operational** (activation, use, backup, rotation), **post-operational** (archival, recovery), and **deletion** (destruction, zeroization).
+Step 5:  Find d where d × e ≡ 1 mod φ(n)
+         d = 103  (because 7 × 103 = 721 = 6×120 + 1)
 
-Key generation must be truly random — using a weak random number generator is a critical vulnerability. Keys must be stored securely — ideally in **Hardware Security Modules (HSMs)**, tamper-resistant physical devices that keep keys inside and expose only an API for cryptographic operations. Keys must be rotated regularly. When compromised, they must be revoked immediately.
+Public key:  (e=7,   n=143)
+Private key: (d=103, n=143)
+```
 
-**Key Derivation Functions (KDFs)** solve a different problem: deriving strong cryptographic keys from weak human-memorable passwords. The formula is `KDF(password, salt, difficulty, key size)`. The salt prevents rainbow tables. The difficulty factor — number of iterations — makes brute force slow. Argon2, bcrypt, scrypt, and PBKDF2 are all KDFs. Argon2 is the current gold standard.
+#### Encryption & Decryption
 
----
+```
+Encrypt:   C = M^e mod n    →    M^7 mod 143
+Decrypt:   M = C^d mod n    →    C^103 mod 143
+```
 
-## Part 7 — Digital Signatures and PKI
+#### RSA Key Sizes
 
-Digital signatures provide three things simultaneously: **authenticity** (this came from who it claims), **integrity** (it hasn't been altered), and **non-repudiation** (the sender can't deny it). They use asymmetric cryptography in a specific way.
+| Key size | Security | Use |
+|----------|---------|-----|
+| 512-bit | ❌ Broken | Never |
+| 1024-bit | ❌ Weak | Legacy only |
+| 2048-bit | ✅ Minimum acceptable | Current standard |
+| 4096-bit | ✅ Strong | High security |
 
-To sign: hash the document, then encrypt that hash with your private key. The encrypted hash is the signature. To verify: decrypt the signature with the sender's public key to get the claimed hash, then hash the received document yourself. If the hashes match, the document is authentic and unchanged. The signature is tied to the private key — only the true owner could have produced it.
-
-Three common signature algorithms: **RSA** (based on prime factorisation, large keys, used in SSL/TLS and email), **DSA** (discrete logarithm, moderate keys), and **ECDSA** (elliptic curve discrete logarithm, small keys — 256-bit ECDSA is equivalent to 3072-bit RSA). ECDSA is used in Bitcoin and most modern mobile applications.
-
-The **PKI (Public Key Infrastructure)** is the system that makes public keys trustworthy at scale. The problem: anyone can generate a key pair and claim to be anyone. PKI solves this by having **Certificate Authorities (CAs)** — trusted third parties that digitally sign certificates binding a public key to a verified identity.
-
-An **X.509 certificate** contains: the subject's public key, the subject's identity, the issuer (CA) name, validity dates, serial number, and the CA's digital signature over all of this. When your browser connects to a website, it verifies the site's certificate was signed by a CA your OS trusts. The chain of trust goes: root CA → intermediate CA → website certificate.
-
-When a certificate needs to be invalidated before expiry (key compromise, organisation change), two mechanisms exist: **CRL (Certificate Revocation List)** — a periodically published list of revoked certificates, but potentially stale — and **OCSP (Online Certificate Status Protocol)** — a real-time query to the CA returning "good", "revoked", or "unknown" for a specific certificate.
-
----
-
-## Part 8 — Security Protocols
-
-**TLS (Transport Layer Security)** is what HTTPS runs on. It provides confidentiality (symmetric encryption), integrity (HMAC), and authentication (PKI/certificates) in a single protocol. The TLS handshake negotiates cipher suites, authenticates the server via certificate, and establishes a session key — all before a single byte of application data is sent. TLS 1.3 is the current version; TLS 1.0 and 1.1 are deprecated.
-
-**PGP (Pretty Good Privacy)** is a hybrid cryptosystem for email and files. Message encrypted with a randomly generated symmetric key. That symmetric key encrypted with the recipient's public key. Both sent together. Recipient uses their private key to get the symmetric key, then decrypts the message. Also uses digital signatures for authentication.
-
-**SSH (Secure Shell)** secures remote access to servers. Uses public key cryptography for authentication — you generate a key pair, put the public key on the server, and authenticate using your private key without ever transmitting a password.
-
-**IPSec** secures IP-layer communications. Used in VPNs. Has two components: **AH (Authentication Header)** for integrity and **ESP (Encapsulating Security Payload)** for confidentiality and authentication.
+> **Quantum threat:** Shor's algorithm can factor large integers efficiently on a quantum computer. RSA is broken in a post-quantum world. → See [[Post-Quantum Cryptography]]
 
 ---
 
-## Part 9 — SSO and Authentication
+## 6 · Key Management
 
-**SSO (Single Sign-On)** lets you log in once and access multiple services. The analogy: a festival wristband. Show your ID once at the gate, get a wristband, and that wristband gets you into every stage and bar without showing ID again.
+> **The one-liner:** The strongest algorithm means nothing if the keys are managed poorly. Key management is where most real-world cryptographic failures happen.
 
-Technically: you log in to an Identity Provider (Google, Microsoft), which issues a token stored in your browser. Every other service checks that token with the Identity Provider rather than asking for your password.
+### Key Lifecycle
 
-Protocols: **SAML** uses XML, designed for enterprise web SSO. **OAuth 2.0** is authorisation (what can this app access?) not authentication (who are you?). **OIDC** (OpenID Connect) adds authentication on top of OAuth 2.0 — the most modern approach, uses JWT tokens. **Kerberos** uses tickets and mutual authentication in corporate networks. **LDAP** is a directory protocol for looking up user information.
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    KEY LIFECYCLE                            │
+│                                                             │
+│  PRE-OPERATIONAL    OPERATIONAL    POST-OPERATIONAL  DELETE │
+│  ┌────────────┐   ┌────────────┐   ┌────────────┐  ┌────┐  │
+│  │ Generate   │   │ Activate   │   │ Archive    │  │Zer-│  │
+│  │ Register   │──►│ Use        │──►│ Recover    │─►│oize│  │
+│  │ Certify    │   │ Backup     │   │ Reactivate │  │    │  │
+│  │ Distribute │   │ Rotate     │   └────────────┘  └────┘  │
+│  └────────────┘   │ Revoke     │                            │
+│                   └────────────┘                            │
+└─────────────────────────────────────────────────────────────┘
+```
 
-**MFA (Multi-Factor Authentication)** requires at least two of: something you know (password), something you have (phone, hardware token), something you are (biometrics). The principle: compromising one factor isn't enough.
+**The 12 steps in full:**
+
+| # | Step | What happens |
+|---|------|-------------|
+| 1 | User registration | Entity joins the security domain |
+| 2 | User initialisation | Cryptographic software/hardware set up |
+| 3 | **Key generation** | Must be truly random — weak RNG = critical vulnerability |
+| 4 | Key installation | Key loaded into device or application |
+| 5 | Key registration | CA binds public key to identity in a certificate |
+| 6 | Normal use | Key used until cryptoperiod expires |
+| 7 | **Key backup** | Short-term copy in secure storage during active use |
+| 8 | Key update | Replace before cryptoperiod expires |
+| 9 | Archival | Long-term offline storage after use ends |
+| 10 | De-registration + destruction | All copies destroyed, records removed |
+| 11 | Key recovery | Restore from backup if lost (not compromised) |
+| 12 | **Key revocation** | Emergency removal if key is compromised |
+
+### Key Storage Types
+
+| Type | Examples | Security | Use when |
+|------|---------|---------|---------|
+| **Hardware (HSM)** | Smart cards, Hardware Security Modules, tokens | Highest — tamper-resistant | High-value keys, CAs, payment systems |
+| **Software** | Files, databases, environment variables | Lower — depends on OS security | Development, low-risk applications |
+| **Hybrid** | Encrypted files on hardware devices | Medium | Balance of security and convenience |
+
+### Key Derivation Functions (KDF)
+
+```
+          Salt
+           │
+Password ──┤
+           │
+     Difficulty (iterations)     →  [  KDF  ]  →  Derived Key
+           │
+      Key size
+           │
+```
+
+**Why not just hash the password?**
+SHA-256 of "password123" takes microseconds to compute. An attacker can try billions of guesses per second. KDFs are designed to be slow — Argon2 can take 100ms per hash. Same attack now takes millions of years.
+
+| KDF | Type | Strength | Notes |
+|-----|------|---------|-------|
+| **Argon2** | Password-based | ⭐⭐⭐⭐⭐ | Winner of Password Hashing Competition — best choice |
+| bcrypt | Password-based | ⭐⭐⭐⭐ | Widely deployed, still solid |
+| scrypt | Password-based | ⭐⭐⭐⭐ | Memory-hard |
+| PBKDF2 | Password-based | ⭐⭐⭐ | NIST approved, less memory-hard |
+| HKDF | Symmetric-key | ⭐⭐⭐⭐ | For deriving session keys |
 
 ---
 
-## Part 10 — Cryptanalysis
+## 7 · Digital Signatures & PKI
 
-Cryptanalysis is the science of breaking cryptographic systems without the key. Understanding attacks is essential for understanding why good cryptography is designed the way it is.
+> **The one-liner:** Digital signatures prove a message came from a specific sender and hasn't been altered — using asymmetric cryptography in reverse.
 
-Attack types by what the attacker has access to: **ciphertext-only** (only encrypted data), **known-plaintext** (some plaintext and its ciphertext), **chosen-plaintext** (attacker can choose what gets encrypted), **chosen-ciphertext** (attacker can choose what gets decrypted).
+### How Signing Works
 
-**Differential cryptanalysis** studies how differences in input pairs propagate through a cipher to the output. By choosing plaintext pairs with a specific XOR difference, certain output differences occur with higher probability than random — this leaks information about the key. It targets the last round of a block cipher specifically, because the attacker can partially decrypt the ciphertext using guessed key bits and check whether expected differences appear.
+```
+SENDER (Alice)                              RECEIVER (Bob)
+──────────────                              ───────────────
 
-**Linear cryptanalysis** finds linear approximations — equations involving XORs of specific plaintext, ciphertext, and key bits that hold with probability slightly above or below 0.5. Enough chosen plaintext samples and you can extract key bits.
+Document                                    Document + Signature
+     │                                           │
+     ▼                                           ▼
+  [Hash]  →  hash value                       [Hash]  →  hash value (from doc)
+     │                                              │
+     │   Encrypt with                               │   Compare ──► MATCH? ✅ Authentic
+     │   Alice's PRIVATE key                        │              MISMATCH? ❌ Tampered
+     │                                              │
+     ▼                                    Decrypt with
+  Signature                               Alice's PUBLIC key
+     │                                              │
+     └──────────── attached to doc ────────────────┘
+```
 
-**Side-channel attacks** don't attack the algorithm at all — they exploit physical information leaking from the implementation: timing differences, power consumption, electromagnetic emissions. A device taking longer to process a 1 vs a 0 leaks key bits through timing alone.
+**What a signature proves:**
+
+| Property | Meaning |
+|----------|---------|
+| ✅ Authenticity | Only Alice's private key could produce this signature |
+| ✅ Integrity | Any change to the document would break the hash |
+| ✅ Non-repudiation | Alice cannot deny signing — only she has her private key |
+| ❌ Confidentiality | Signing doesn't encrypt — document is still readable |
+
+### Signature Algorithms Compared
+
+| | RSA | DSA | ECDSA |
+|--|-----|-----|-------|
+| Security basis | Prime factorisation | Discrete logarithm | Elliptic curve DLP |
+| Key size needed | 2048–4096 bits | 1024–3072 bits | **256–521 bits** |
+| Signing speed | Slow | Moderate | Fast |
+| Verification | Fast | Slow | Fast |
+| Best for | SSL/TLS, email | Government | Blockchain, IoT, mobile |
 
 ---
 
-## Part 11 — Advanced Topics
+### PKI — Public Key Infrastructure
 
-### Quantum Cryptography
-Shor's algorithm, running on a sufficiently powerful quantum computer, can factor large integers efficiently — which breaks RSA, DH, and ECC. Grover's algorithm halves the effective security of symmetric ciphers (AES-256 becomes roughly AES-128 strength against quantum). These aren't hypothetical: NIST has already begun standardising post-quantum algorithms.
+> **The passport analogy:** The government (CA) issues passports (certificates) binding your photo (public key) to your identity. Border control trusts passports because they trust the government. You don't need to personally vouch for yourself at every border.
 
-**QKD (Quantum Key Distribution)** uses individual photons to distribute cryptographic keys. Security comes from physics: measuring a quantum state disturbs it (the uncertainty principle), and quantum states cannot be copied (the no-cloning theorem). Any eavesdropper necessarily introduces detectable errors.
+```
+ROOT CA
+(self-signed certificate — the trust anchor)
+     │
+     ├──► Intermediate CA
+     │         │
+     │         ├──► Website Certificate (e.g. bank.com)
+     │         └──► Website Certificate (e.g. shop.com)
+     │
+     └──► Intermediate CA
+               │
+               └──► Website Certificate (e.g. gov.uk)
+```
 
-**BB84** (Bennett & Brassard, 1984): Alice sends photons polarised in one of four states (H, V, +45°, −45°). Bob measures each with a randomly chosen basis. They compare which bases they used — not the results — over a public channel. Bits where they used the same basis form the key. A sample is disclosed to test for errors; high error rate means Eve was present.
+**PKI Components:**
 
-### Post-Quantum Cryptography
-PQC is classical cryptography redesigned to resist quantum attacks. It runs on normal hardware — no quantum tech required. Four main families: **lattice-based** (Learning With Errors problem — leading candidate, supports both encryption and signatures), **code-based** (McEliece, based on error-correcting codes, very large keys, long history of security), **hash-based** (SPHINCS+, XMSS — signatures only, security depends only on hash function security), **multivariate** (solving systems of nonlinear equations — signatures only). NIST has selected algorithms from lattice-based and hash-based families for standardisation.
+| Component | Role |
+|-----------|------|
+| **Root CA** | Top of the trust chain. Self-signed. Trusted by operating systems. |
+| **Intermediate CA** | Signed by Root CA. Issues end-entity certificates. |
+| **Certificate** | Binds a public key to a verified identity. Signed by a CA. |
+| **CRL** | List of revoked certificates. Updated periodically — can be stale. |
+| **OCSP** | Real-time revocation check. Query CA for single certificate status. |
 
-### Homomorphic Encryption
-Homomorphic encryption lets you perform computations on encrypted data without decrypting it. The result, when decrypted, matches what you'd get computing on the plaintext. The glove box analogy: scientists can manipulate samples inside a sealed box without touching them directly. Only the key holder can open the box and retrieve results.
+### X.509 Certificate Contents
 
-**PHE (Partial)** supports one operation type (addition or multiplication) unlimited times. **FHE (Full)** supports both, but is currently around one million times slower than plaintext computation due to the need to manage "noise" — a small random term added to ciphertext for security that grows with each operation and must be periodically reduced via bootstrapping.
+```
+┌─────────────────────────────────────────┐
+│         X.509 CERTIFICATE               │
+├─────────────────────────────────────────┤
+│ Version:        3                        │
+│ Serial number:  unique ID from CA        │
+│ Algorithm:      SHA-256 with RSA         │
+│ Issuer:         DigiCert Inc             │
+│ Valid from:     2026-01-01               │
+│ Valid until:    2027-01-01               │
+│ Subject:        bank.com                 │
+│ Public key:     [2048-bit RSA key]       │
+│ Signature:      [CA's digital signature] │
+└─────────────────────────────────────────┘
+```
 
-### Elliptic Curve Cryptography
-ECC provides equivalent security to RSA with much smaller keys — a 256-bit ECC key matches a 3072-bit RSA key. Based on the algebraic structure of elliptic curves over finite fields. The equation y² = x³ + ax + b defines a curve; operations on points on that curve (point addition, scalar multiplication) provide the hard mathematical problem. Given a public key Q = dP (where P is a known base point and d is the private key), finding d from Q is the Elliptic Curve Discrete Logarithm Problem — computationally infeasible. ECDSA for signatures, ECDH for key exchange. Used in Bitcoin, TLS 1.3, and most modern mobile security.
+### Certificate Revocation — CRL vs OCSP
+
+| | CRL | OCSP |
+|--|-----|------|
+| How it works | Download list of revoked certs | Query CA for one cert in real time |
+| Freshness | Can be hours/days stale | Real-time |
+| Size | Large — entire revoked list | Small — one cert response |
+| Requires internet | No (cached list) | Yes |
+| Speed | Fast (local check) | Network round-trip |
 
 ---
 
-## Part 12 — Secure System Design
+## 8 · Security Protocols
+
+> **The one-liner:** Protocols are the rules that govern how cryptographic operations are combined to secure real communication — email, web traffic, remote access, VPNs.
+
+### TLS — Transport Layer Security
+
+```
+Client                                        Server
+──────                                        ──────
+ClientHello (TLS version, cipher suites) ─────────────────►
+                             ◄──── ServerHello + Certificate
+                                   (server's public key, signed by CA)
+Verify certificate against trusted CA
+Generate pre-master secret
+Encrypt with server's public key ─────────────────────────►
+                             ◄──── Derive session keys (both sides)
+Finished ─────────────────────────────────────────────────►
+                             ◄──── Finished
+═══════════════════ Encrypted Application Data ════════════
+```
+
+**TLS provides:**
+
+| Goal | Mechanism |
+|------|----------|
+| Confidentiality | Symmetric encryption (AES) with negotiated session key |
+| Integrity | HMAC on every message |
+| Authentication | Server's X.509 certificate verified against trusted CA |
+
+| Version | Status |
+|---------|--------|
+| SSL 3.0 | ❌ Broken |
+| TLS 1.0 | ❌ Deprecated |
+| TLS 1.1 | ❌ Deprecated |
+| TLS 1.2 | ⚠️ Acceptable |
+| **TLS 1.3** | ✅ Current — use this |
+
+### PGP — Pretty Good Privacy
+
+```
+Alice wants to send an encrypted, authenticated email to Bob:
+
+1. Generate random symmetric key K
+2. Encrypt message with K           →  Encrypted message
+3. Encrypt K with Bob's public key  →  Encrypted key
+4. Sign with Alice's private key    →  Signature
+5. Send: [Encrypted message] + [Encrypted key] + [Signature]
+
+Bob receives:
+1. Decrypt key: K = decrypt(Encrypted key, Bob's private key)
+2. Decrypt message using K
+3. Verify signature using Alice's public key
+```
+
+**PGP uses hybrid encryption** — symmetric for speed, asymmetric for key exchange.
+
+### Protocol Comparison
+
+| Protocol | Layer | Primary use | Key crypto |
+|----------|-------|------------|-----------|
+| **TLS** | Transport | HTTPS, secure web traffic | RSA/ECDH + AES + HMAC |
+| **SSH** | Application | Remote server access | RSA/ECDSA key auth |
+| **IPSec** | Network | VPNs, IP-layer security | AES + HMAC |
+| **PGP** | Application | Email, file encryption | Hybrid (RSA + AES) |
+
+**IPSec components:**
+
+| Component | Purpose |
+|-----------|---------|
+| **AH** (Authentication Header) | Integrity only — no confidentiality |
+| **ESP** (Encapsulating Security Payload) | Confidentiality + integrity + auth |
+
+---
+
+## 9 · SSO & Authentication
+
+> **The one-liner:** Log in once, access everything. SSO uses tokens instead of passwords to grant access across multiple services.
+
+### How SSO Works
+
+```
+1. User visits app.com
+        │
+        ▼
+2. app.com redirects to Identity Provider (IdP)
+   e.g. Google, Microsoft, Okta
+        │
+        ▼
+3. User logs in at IdP
+        │
+        ▼
+4. IdP creates TOKEN and sends back to app.com
+        │
+        ▼
+5. User visits another-app.com
+        │
+        ▼
+6. another-app.com checks token with IdP
+        │
+        ▼
+7. IdP confirms → access granted ✅
+   No password entered again
+```
+
+### Protocol Comparison
+
+| Protocol | What it does | Format | Best for |
+|----------|-------------|--------|---------|
+| **SAML** | Auth + authorisation data exchange | XML | Enterprise web SSO |
+| **OAuth 2.0** | Access delegation ("what can this app access?") | JSON tokens | Third-party API access |
+| **OIDC** | Authentication layer on top of OAuth 2.0 | JWT (ID token) | Modern SSO with profile info |
+| **Kerberos** | Ticket-based mutual authentication | Binary tickets | Corporate networks (AD) |
+| **LDAP** | Directory service protocol | — | Looking up user/group info |
+
+> **OIDC vs OAuth 2.0:** OAuth 2.0 answers "what can this app access?" OIDC additionally answers "who is this user?" OIDC = OAuth 2.0 + identity layer.
+
+### MFA — Multi-Factor Authentication
+
+```
+┌─────────────────────────────────────────┐
+│           THREE FACTORS                  │
+│                                          │
+│  🧠 Something you KNOW                  │
+│     Password, PIN, security question     │
+│                                          │
+│  📱 Something you HAVE                  │
+│     Phone (OTP), hardware token, card    │
+│                                          │
+│  👁 Something you ARE                   │
+│     Fingerprint, face, iris scan         │
+│                                          │
+│  Requires 2+ of the above               │
+└─────────────────────────────────────────┘
+```
+
+### SSO Benefits vs Risks
+
+| Benefits | Risks |
+|---------|-------|
+| One credential to manage | Single point of failure — IdP compromised = all apps compromised |
+| Easier to audit and monitor | Token theft enables session hijacking |
+| Smaller overall attack surface | App compatibility issues |
+| Users less likely to reuse passwords | |
+
+---
+
+## 10 · Cryptanalysis
+
+> **The one-liner:** The science of breaking cryptographic systems without the key — by exploiting weaknesses in design, implementation, or usage.
+
+```
+Cryptology
+    ├── Cryptography  (making secure systems)
+    └── Cryptanalysis (breaking secure systems)
+```
+
+### Attack Types — By What the Attacker Has
+
+| Attack | What attacker has | Power |
+|--------|------------------|-------|
+| **Ciphertext-only** | Only encrypted data | Weakest — frequency analysis |
+| **Known-plaintext** | Some plaintext + ciphertext pairs | Medium |
+| **Chosen-plaintext** | Can choose what gets encrypted | Strong |
+| **Chosen-ciphertext** | Can choose what gets decrypted | Very strong |
+| **Related-key** | Ciphertexts from related keys | Specific to some ciphers |
+
+### Classical Methods
+
+| Method | How it works | Breaks |
+|--------|-------------|--------|
+| **Frequency analysis** | Most common ciphertext symbol → likely E | Caesar, simple substitution |
+| **Kasiski examination** | Find repeating patterns → reveals keyword length | Vigenère |
+| **Index of coincidence** | Measures letter frequency vs expected language distribution | Polyalphabetic ciphers |
+
+### Modern Attack Techniques
+
+#### Differential Cryptanalysis
+
+```
+Choose two plaintexts P1, P2 with a fixed XOR difference (ΔP):
+
+P1: 01001000 01100101  ]
+                       }── XOR difference ΔP is fixed
+P2: 01001000 01100100  ]
+
+Encrypt both → C1, C2
+Observe output difference ΔC
+
+Certain ΔC values occur with HIGHER probability than random.
+These biases reveal information about the key bits.
+Target: the LAST round (can be partially decrypted using guessed key bits)
+```
+
+#### Linear Cryptanalysis
+
+Finds linear equations involving XOR combinations of plaintext, ciphertext, and key bits that hold with probability slightly ≠ 0.5. With enough samples, extract key bits statistically.
+
+#### Side-Channel Attacks
+
+```
+Don't attack the algorithm — attack the IMPLEMENTATION.
+
+Timing attack:    operation on 1 takes longer than on 0 → leaks key bits
+Power analysis:   power consumption varies with data → leaks key bits
+EM emissions:     electromagnetic output reveals internal state
+Cache timing:     cache hits vs misses reveal memory access patterns
+```
+
+### Attack Comparison
+
+| Attack | Target | Requires | Defends against by |
+|--------|--------|---------|-------------------|
+| Brute force | Key space | Time + compute | Longer keys |
+| Differential | S-boxes in block ciphers | Chosen plaintexts | Resistant S-box design |
+| Linear | Linear approximations | Known plaintexts | Non-linear operations |
+| Side-channel | Physical implementation | Physical access | Constant-time implementations |
+| Meet-in-the-middle | Double encryption | Memory + time | Triple encryption |
+
+---
+
+## 11 · Quantum & Post-Quantum
+
+> **The one-liner:** Quantum computers will break RSA, ECC, and DH. Post-Quantum Cryptography (PQC) is the replacement — classical algorithms redesigned to resist quantum attacks.
+
+### The Quantum Threat
+
+```
+SHOR'S ALGORITHM (1994)
+────────────────────────
+Can factor large integers efficiently on a quantum computer.
+
+Breaks: RSA, Diffie-Hellman, ECC, DSA
+→ All public-key cryptography based on factoring or discrete log
+
+GROVER'S ALGORITHM
+──────────────────
+Halves the effective key length of symmetric ciphers.
+
+AES-256 → effectively AES-128 strength against quantum
+Fix: double key lengths (AES-256 remains adequate)
+```
+
+### Quantum Key Distribution (QKD)
+
+> **The soap bubble analogy:** A message written on soap bubbles. If anyone tries to read it in transit, the bubbles pop — and both parties immediately know someone was listening.
+
+```
+Alice                    Photon channel                    Bob
+─────                    ──────────────                    ───
+Send photon with         ──────────────►    Measure with
+random polarisation:                        random basis:
+H, V, +45°, -45°
+                               Eve?
+                         if Eve intercepts:
+                         uncertainty principle
+                         disturbs the photon ──► error detected
+
+Compare bases over classical channel:
+Where bases match → use those bits as key
+High error rate → Eve was present → abort and restart
+```
+
+#### BB84 Protocol Steps
+
+| Step | Who | Action |
+|------|-----|--------|
+| 1 | Alice | Sends photons with random polarisation (H/V or diagonal basis) |
+| 2 | Bob | Measures each photon with randomly chosen basis |
+| 3 | Both | Compare which bases were used (not results) over public channel |
+| 4 | Both | Keep bits where bases matched → raw key |
+| 5 | Both | Sacrifice sample to check error rate |
+| 6 | Decision | Low errors → no Eve → use key. High errors → Eve present → discard |
+
+**QKD Limitations:**
+
+| Limitation | Why |
+|-----------|-----|
+| Slow | Single photons only — can't use whole photon bundles |
+| Distance limited | Quantum states degrade; can't use standard repeaters |
+| Dedicated infrastructure | Requires separate fibre — can't share with internet |
+| Expensive | Specialised hardware |
+
+---
+
+### Post-Quantum Cryptography (PQC)
+
+```
+PQC vs QKD
+──────────
+PQC:  Classical algorithms. Runs on normal hardware.
+      Security = mathematical hardness.
+      Scalable. Deploy as software update.
+
+QKD:  Requires quantum hardware + specialist fibre.
+      Security = laws of physics.
+      Expensive. Distance-limited. Not scalable yet.
+
+→ PQC is the near-term practical solution.
+→ QKD is a long-term physical security layer.
+```
+
+**The 4 PQC Families:**
+
+| Family | Hard problem | Key/sig size | Use |
+|--------|-------------|-------------|-----|
+| **Lattice-based** | Learning With Errors (LWE) | Moderate | Encryption + signatures — **leading candidate** |
+| **Code-based** | Decoding random error-correcting codes | Very large keys | Encryption (McEliece) |
+| **Hash-based** | Security of hash functions | Small keys, large sigs | Signatures only (SPHINCS+, XMSS) |
+| **Multivariate** | Solving nonlinear polynomial systems | Small keys | Signatures only |
+
+> NIST has selected algorithms from lattice-based and hash-based families. Standardisation complete 2024.
+
+---
+
+## 12 · Homomorphic Encryption
+
+> **The one-liner:** Perform computations on encrypted data without decrypting it. The result, when decrypted, equals what you'd get computing on the plaintext.
+
+### The Glove Box Analogy
+
+```
+┌─────────────────────────────────────────┐
+│          🔒 LOCKED GLOVE BOX            │
+│                                          │
+│   Scientists insert hands through        │
+│   built-in gloves and manipulate         │
+│   samples inside — mix, measure,         │
+│   process — without opening the box      │
+│   or touching samples directly.          │
+│                                          │
+│   Only the key holder can open the box  │
+│   and retrieve the finished result.      │
+└─────────────────────────────────────────┘
+```
+
+**Real-world use case:**
+```
+You → [encrypt medical data] → Cloud service
+Cloud service → [compute on encrypted data] → [return encrypted result]
+You → [decrypt result]
+
+Cloud NEVER sees your actual data. ✅
+```
+
+### PHE vs FHE
+
+| | Partial (PHE) | Full (FHE) |
+|--|--------------|-----------|
+| Operations supported | One type only (+ or ×), unlimited times | Both addition AND multiplication, unlimited times |
+| Speed | Fast | ~1,000,000× slower than plaintext |
+| Practical today | ✅ | ⚠️ Limited use cases only |
+| Example schemes | RSA (×), Paillier (+) | BGV, BFV, CKKS |
+
+**RSA is partially homomorphic (multiplicative):**
+```
+E(m1) × E(m2) = E(m1 × m2)
+
+Proof:
+E(m1) = m1^e mod n
+E(m2) = m2^e mod n
+E(m1) × E(m2) = (m1 × m2)^e mod n = E(m1 × m2)  ✅
+```
+
+### FHE Schemes
+
+All lattice-based. All quantum-safe (based on RLWE hardness).
+
+| Scheme | Operates on | Use case |
+|--------|------------|---------|
+| **BGV** | Integers | Exact arithmetic |
+| **BFV** | Integers | Exact arithmetic |
+| **CKKS** | Complex/approximate numbers | Machine learning, statistics |
+
+### The Noise Problem
+
+```
+Fresh ciphertext:  [data + small noise]
+After 1 operation: [result + slightly larger noise]
+After 2 ops:       [result + larger noise]
+...
+After N ops:       [noise overwhelms data → decryption fails ❌]
+
+Solution: Bootstrapping — a special operation that reduces noise,
+allowing more operations. Very expensive computationally.
+This is why FHE is ~1 million× slower.
+```
+
+---
+
+## 13 · Elliptic Curve Cryptography
+
+> **The one-liner:** Asymmetric cryptography using elliptic curves — same security as RSA but with dramatically smaller keys.
+
+### What is an Elliptic Curve?
+
+```
+y² = x³ + ax + b
+
+Graph (over real numbers):
+
+      *     *
+   *           *
+  *             *
+   *           *
+     *       *
+        * *
+
+Properties:
+- Smooth (no sharp corners)
+- Symmetric about the x-axis
+- Defined over a finite field for cryptography
+```
+
+### Point Operations
+
+```
+POINT ADDITION: P + Q = R
+─────────────────────────
+Draw a line through P and Q.
+Find where it intersects the curve (call it R').
+Reflect R' over the x-axis → R
+
+POINT DOUBLING: P + P = 2P
+──────────────────────────
+Draw the tangent line at P.
+Find where it intersects (R').
+Reflect → R
+
+SCALAR MULTIPLICATION: nP
+─────────────────────────
+Add P to itself n times.
+This is the one-way function — easy to compute forward, infeasible to reverse.
+```
+
+**The hard problem:** Given public point Q = dP, finding d (the private key) is the Elliptic Curve Discrete Logarithm Problem (ECDLP) — computationally infeasible.
+
+### ECC vs RSA
+
+| | ECC | RSA |
+|--|-----|-----|
+| 256-bit key ≈ | ⭐ | 3072-bit RSA |
+| 384-bit key ≈ | ⭐ | 7680-bit RSA |
+| Speed | Faster | Slower |
+| Power consumption | Lower | Higher |
+| Ideal for | Mobile, IoT, smartcards | Servers |
+
+### ECC Applications
+
+| Application | Protocol | Used in |
+|-------------|---------|---------|
+| Digital signatures | ECDSA | Bitcoin, TLS, SSH |
+| Key exchange | ECDH | TLS 1.3, Signal, WhatsApp |
+| Certificates | ECDSA | Modern TLS certificates |
+
+### Popular Curves
+
+| Curve | Used in | Notes |
+|-------|--------|-------|
+| **NIST P-256** | TLS, most web traffic | NIST standard |
+| **Curve25519** | Signal, WireGuard, SSH | Considered most secure design |
+| **secp256k1** | Bitcoin | Non-NIST curve |
+| **Brainpool** | EU standards | German BSI designed |
+
+> **Quantum threat:** ECDLP is broken by Shor's algorithm. ECC is not quantum-safe. → See [[Post-Quantum Cryptography]]
+
+---
+
+## 14 · Secure System Design
+
+> **The one-liner:** Security must be designed in from the start — not added afterwards. These 8 principles are the checklist.
 
 ### The 8 Principles
 
-Good security is designed in from the start, not bolted on afterwards. Eight principles guide this:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 8 SECURE DESIGN PRINCIPLES                  │
+├─────────────────────────────────────────────────────────────┤
+│  1. Least Privilege        Give only what's needed          │
+│  2. Defence in Depth       Multiple independent layers      │
+│  3. Separation of Duties   No single point of control       │
+│  4. Fail-Safe Defaults     Default = deny, not allow        │
+│  5. Economy of Mechanism   Keep it simple                   │
+│  6. Complete Mediation     Check every access, every time   │
+│  7. Open Design            Security ≠ secrecy of design     │
+│  8. Psychological Accept.  If it's annoying, users bypass   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-**Least Privilege** — give users and processes only the access they need, nothing more. A marketing employee doesn't need access to payroll databases.
-
-**Defence in Depth** — multiple independent layers of security. An attacker who breaks through the firewall still faces application-level controls, encryption, and monitoring.
-
-**Separation of Duties** — split critical actions so no single person can complete them alone. Financial transactions requiring two authorisations. Developers who can't deploy directly to production.
-
-**Fail-Safe Defaults** — the default state is secure. New accounts have no permissions. Closed ports until explicitly opened. Automatic session expiry.
-
-**Economy of Mechanism** — keep it simple. Every additional component is a potential vulnerability. Simple systems are easier to reason about, audit, and secure.
-
-**Complete Mediation** — check every access, every time. Never cache an authorisation decision. If a user's permissions changed, the next request should reflect that.
-
-**Open Design** — security shouldn't depend on the design being secret. AES is public; its strength comes from mathematics, not obscurity. Secret algorithms can't be audited.
-
-**Psychological Acceptability** — if security is too inconvenient, users bypass it. SSO is more secure than 10 separate passwords because users actually use it properly.
-
-### STRIDE Threat Model
-
-STRIDE is a structured approach to thinking about threats during design. Each letter is a threat category: **Spoofing** (pretending to be someone else), **Tampering** (modifying data), **Repudiation** (denying you did something), **Information Disclosure** (data leaks), **Denial of Service** (making the system unavailable), **Elevation of Privilege** (gaining more access than authorised).
-
-For every system component, run through STRIDE: could an attacker do this? If yes, design a mitigation.
-
-### Legal and Ethical Aspects
-
-Cryptography is governed by law. The FCA regulates financial institutions' use of encryption. PCI-DSS mandates encryption of cardholder data in storage and transit. GDPR requires protection of personal data. Payment Services Regulations 2017 protect electronic payment data. Export controls in some countries restrict exporting strong cryptographic technology.
-
-Ethically: backdoors — deliberate weaknesses inserted for government access — are considered unethical because they weaken security for everyone. Transparency is preferred: open, peer-reviewed algorithms like AES are stronger than proprietary "security through obscurity" approaches.
+| Principle | Scenario example | Violated when |
+|-----------|-----------------|---------------|
+| **Least Privilege** | Marketing intern can't access payroll | "All staff have admin to avoid helpdesk tickets" |
+| **Defence in Depth** | Firewall + auth + encryption + monitoring | Single firewall is the only protection |
+| **Separation of Duties** | Two approvals needed to transfer funds | One person controls entire payment process |
+| **Fail-Safe Defaults** | New accounts have zero permissions | New accounts get default "standard" access |
+| **Economy of Mechanism** | Simple auth flow — one library, well-tested | Homegrown 2000-line authentication module |
+| **Complete Mediation** | Check permissions on every API request | "We checked permissions at login, no need after" |
+| **Open Design** | Using AES (publicly reviewed) | "Our secret algorithm is more secure" |
+| **Psychological Acceptability** | SSO — one login for everything | 10 separate password-protected systems |
 
 ---
 
-*Generated from WM242 lecture materials by Claude | June 2026*
-*For atomic notes and links: see [[MOC WM242 Implementing Secure Systems]]*
+### STRIDE Threat Model
+
+> Use STRIDE during design — before building. For every system component, ask: can each of these 6 things happen here?
+
+```
+╔══════╦═══════════════════════╦══════════════════════╗
+║ Letter║ Threat                 ║ CIA Pillar violated  ║
+╠══════╬═══════════════════════╬══════════════════════╣
+║  S   ║ Spoofing               ║ Authentication        ║
+║  T   ║ Tampering              ║ Integrity             ║
+║  R   ║ Repudiation            ║ Non-repudiation       ║
+║  I   ║ Information Disclosure ║ Confidentiality       ║
+║  D   ║ Denial of Service      ║ Availability          ║
+║  E   ║ Elevation of Privilege ║ Authorisation         ║
+╚══════╩═══════════════════════╩══════════════════════╝
+```
+
+**Example — applying STRIDE to a login form:**
+
+| Threat | Question | Mitigation |
+|--------|---------|-----------|
+| Spoofing | Can someone log in as another user? | Strong passwords + MFA |
+| Tampering | Can someone modify their session token? | HMAC-signed tokens |
+| Repudiation | Can a user deny performing an action? | Audit logs with timestamps |
+| Info Disclosure | Do error messages reveal usernames exist? | Generic error messages |
+| DoS | Can someone lock everyone out with failed logins? | Rate limiting + lockout |
+| Elevation | Can a normal user access admin functions? | Role checks on every endpoint |
+
+### Access Control Types
+
+| Type | Who decides access | Example |
+|------|------------------|---------|
+| **DAC** (Discretionary) | Resource owner | File permissions on macOS |
+| **MAC** (Mandatory) | System policy — labels | Military classified systems |
+| **RBAC** (Role-Based) | User's role | Admin vs user vs guest |
+| **ABAC** (Attribute-Based) | Policy + attributes | "Finance staff in UK during business hours" |
+
+### Secure Development Lifecycle
+
+```
+Plan → Design → Build → Test → Deploy → Maintain
+ │        │        │       │       │        │
+Define   Threat   Secure  Pentest  Config  Patch
+security model   coding   + SAST  harden  updates
+reqs
+```
+
+---
+
+## 15 · Legal, Ethical & Regulatory
+
+> **The one-liner:** Cryptography is governed by law. Using the wrong algorithm, weak keys, or building backdoors can result in legal liability — not just security failures.
+
+### Key Legal Frameworks (UK)
+
+| Law / Standard | Who it applies to | What it requires |
+|---------------|------------------|-----------------|
+| **GDPR** | Anyone processing EU personal data | Encryption of personal data; breach notification |
+| **PCI-DSS** | Anyone handling card payments | Encrypt cardholder data in transit + at rest; key management |
+| **FCA Regulations** | UK financial institutions | Secure handling of financial data; encryption controls |
+| **Payment Services Regulations 2017** | Electronic payment processors | Protect transaction data; customer auth credentials |
+
+**PCI-DSS specifically requires:**
+- Encryption of cardholder data in storage and transmission
+- Strong cryptographic key management practices
+- Failure to comply: fines + increased transaction fees + loss of card processing ability
+
+### The Backdoor Debate
+
+```
+ARGUMENT FOR BACKDOORS          ARGUMENT AGAINST
+────────────────────            ─────────────────
+Law enforcement needs           A backdoor for law enforcement
+access to encrypted data        is a backdoor for EVERYONE
+for criminal investigations.    who finds it.
+
+                                Security is binary — you either
+                                have a secure channel or you don't.
+                                A "lawful intercept" backdoor
+                                weakens encryption for all users.
+```
+
+**Professional stance:** The security community strongly opposes backdoors. Creating intentional weaknesses violates the principle of open design and endangers all users.
+
+### Ethics Quick Reference
+
+| Practice | Ethical? | Why |
+|----------|:--------:|-----|
+| Using publicly reviewed algorithms (AES) | ✅ | Peer review = stronger security |
+| Security through obscurity ("our secret algorithm") | ❌ | Unreviewed, false confidence |
+| Inserting backdoors | ❌ | Weakens security for everyone |
+| Responsible disclosure of vulnerabilities | ✅ | Gives defenders time to patch |
+| Exporting strong crypto to sanctioned states | ❌ | Violates export control law |
+| Not encrypting personal data | ❌ | Likely GDPR violation |
+
+### Export Controls
+Some countries restrict exporting strong cryptographic technology due to national security concerns. The US Wassenaar Arrangement controls exports of dual-use technologies including cryptographic software above certain key lengths.
+
+---
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║                    END OF STUDY GUIDE                        ║
+║                                                              ║
+║  Next step: close this and do active recall.                 ║
+║  Write everything you remember — then check the gaps.        ║
+║                                                              ║
+║  Atomic notes: Knowledge Base/Concepts/                      ║
+║  Navigation:   MOC/MOC WM242 Implementing Secure Systems     ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+---
+*Generated from WM242 lecture materials · June 2026*
+*[[MOC WM242 Implementing Secure Systems]] · [[CIA Triad]] · [[AES Advanced Encryption Standard]] · [[RSA]] · [[Digital Signatures]] · [[PKI Public Key Infrastructure]]*
