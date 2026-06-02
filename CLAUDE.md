@@ -139,7 +139,7 @@ Always confirm at the start of a session:
 ## Learning Logs Protocol
 
 At the START of every session:
-1. Read `CLAUDE.md` (this file)
+1. CLAUDE.md is auto-loaded by Claude Code — no action needed
 2. Read the most recent log in `Learning Logs/` to understand where to pick up
 3. Confirm with Syed: "I've read your last log from [date]. We left off at [X]. Ready to continue?"
 
@@ -148,5 +148,5 @@ At the END of every session (or when Syed asks):
 - Save to `Learning Logs/YYYY-MM-DD — [Module] — [Phase] — [Topic].md`
 - Update the log table in `Learning Logs/README.md`
 
-**Never start a session without reading the latest log first.**
+**Always read the latest Learning Log at the start of each session — CLAUDE.md is auto-loaded but the log is not.**
 It contains: what was covered, what didn't click, weak areas to probe, and exact instructions for where to pick up.

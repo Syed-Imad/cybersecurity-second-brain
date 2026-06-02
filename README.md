@@ -138,7 +138,7 @@ claude
 
 ### Step 4 — Run the ingestion prompt
 ```
-Read CLAUDE.md and my latest log in Learning Logs/.
+Read my latest log in Learning Logs/.
 Then ingest Raw Materials/Year 2/Module 2 - [name]/
 Generate:
 1. Atomic concept notes in Knowledge Base/Concepts/
@@ -160,19 +160,19 @@ git push
 
 ### Starting any session
 ```
-Read CLAUDE.md and my latest log in Learning Logs/
+Read my latest log in Learning Logs/
 Then [tell me what we're doing today]
 ```
 
 ### Ingesting a module
 ```
-Read CLAUDE.md and ingest Raw Materials/Year 2/Module 2 - [name]/
+Ingest Raw Materials/Year 2/Module 2 - [name]/
 Generate atomic concept notes, a study guide, a MOC, and a learning log.
 ```
 
 ### Being taught a topic
 ```
-Read CLAUDE.md and teach me [topic] using an analogy and examples.
+Teach me [topic] using an analogy and examples.
 Start with the problem it solves before explaining how it works.
 ```
 
@@ -191,7 +191,7 @@ Give detailed feedback after each answer.
 
 ### Continuing from a previous session
 ```
-Read CLAUDE.md and Learning Logs/[date — module — phase].md
+Read Learning Logs/[date — module — phase].md
 Pick up where we left off.
 ```
 
@@ -433,7 +433,7 @@ Learning Logs solve the continuity problem. Claude has no memory between session
 
 ### Every session starts with:
 ```
-Read CLAUDE.md and my latest log in Learning Logs/
+Read my latest log in Learning Logs/
 [then tell Claude what you want to do today]
 ```
 
@@ -536,9 +536,9 @@ Creates a live website at: `https://YOUR-USERNAME.github.io/cybersecurity-second
 
 | Task | Where | Prompt / Action |
 |------|-------|----------------|
-| Start any session | Claude Code | `Read CLAUDE.md and my latest log in Learning Logs/` |
+| Start any session | Claude Code | `Read my latest log in Learning Logs/` |
 | Add new module files | `Raw Materials/Year X/Module Y/` | Drag and drop |
-| Ingest a module | Claude Code | `Read CLAUDE.md and ingest Raw Materials/Year 2/Module 2 - [name]/` |
+| Ingest a module | Claude Code | `Ingest Raw Materials/Year 2/Module 2 - [name]/` |
 | Read and learn | `Knowledge Base/Study Guides/` in Obsidian | Open the study guide, read top to bottom |
 | Look up a concept | `Knowledge Base/Concepts/` in Obsidian | Cmd+F search |
 | See knowledge graph | Obsidian | Cmd+G |
